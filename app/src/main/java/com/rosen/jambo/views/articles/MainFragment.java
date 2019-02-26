@@ -1,4 +1,4 @@
-package com.rosen.jambo.views;
+package com.rosen.jambo.views.articles;
 
 
 import android.content.Context;
