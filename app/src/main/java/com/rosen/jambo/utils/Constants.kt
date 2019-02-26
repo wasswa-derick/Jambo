@@ -6,4 +6,5 @@ package com.rosen.jambo.utils
  * Andela (Kampala, Uganda)
  */
 object Constants {
+    const val API_URL = "https://newsapi.org/v2"
 }
