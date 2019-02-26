@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">Jambo</string>
+
+    <string name="no_internet">No active Internet Connection</string>
+    <string name="no_items">No Items for location</string>
+
+    <string-array name="locations">
+        <item>Home</item>
+        <item>Kampala</item>
+        <item>Nairobi</item>
+        <item>Lagos</item>
+        <item>Kigali</item>
+        <item>New York</item>
+    </string-array>
+
+
+    <string name="lists">List</string>
+    <string name="quilt">Quilt</string>
+    <string name="textstyle">Text style</string>
+    <string name="textsize">Font size</string>
+
+    <string name="mores">More</string>
+    <string name="share">Share</string>
+    <string name="copy">Copy</string>
+
 </resources>

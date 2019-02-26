@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_list"
+        android:orderInCategory="100"
+        android:title="@string/lists"
+        android:icon="@drawable/ic_view_list_white_24dp"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_quilt"
+        android:orderInCategory="101"
+        android:title="@string/quilt"
+        android:icon="@drawable/ic_view_quilt_white_24dp"
+        app:showAsAction="ifRoom" />
+
+
+    <item
+        android:id="@+id/action_text_style"
+        android:orderInCategory="102"
+        android:title="@string/textstyle"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_text_size"
+        android:orderInCategory="103"
+        android:title="@string/textsize"
+        app:showAsAction="never" />
+
+
+</menu>
