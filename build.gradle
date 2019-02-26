@@ -2,6 +2,7 @@
 
 buildscript {
     ext.kotlin_version = '1.2.71'
+    ext.drawer = '2.0.8'
 
     repositories {
         google()
@@ -21,6 +22,21 @@ allprojects {
         google()
         jcenter()
     }
+}
+
+ext {
+    myBuildToolsVersion="28.0.0"
+    myMinSdkVersion=19
+    myTargetSdkVersion=28
+    myCompileSdkVersion=28
+
+    // dependencies versions
+    supportLibraryVersion = '28.0.0'
+    constraintLayoutVersion = '1.1.3'
+    junitVersion = '4.12'
+    testRunnerVersion = '1.0.2'
+    expressoVersion = '3.0.2'
+
 }
 
 task clean(type: Delete) {
