@@ -1,4 +1,4 @@
-package com.rosen.jambo.views;
+package com.rosen.jambo.views.articles;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
