@@ -37,7 +37,7 @@ ext {
     testRunnerVersion = '1.0.2'
     expressoVersion = '3.0.2'
     retrofitVersion = '2.4.0'
-
+    dagger2 = '2.13'
 }
 
 task clean(type: Delete) {
