@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     private ViewHolder mViewHolder;
     private ArrayList<String> mTitles = new ArrayList<>();
 
+    String NEWS_API_KEY = System.getenv("NEWS_API_KEY");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
