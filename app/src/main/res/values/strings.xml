@@ -3,6 +3,10 @@
 
     <string name="no_internet">No active Internet Connection</string>
     <string name="no_items">No Items for location</string>
+    <string name="pick_address">Tap pick location to get your address</string>
+    <string name="pick_location">PICK LOCATION</string>
+    <string name="current_location_pick">Welcome! Where are you at?</string>
+    <string name="proceed">PROCEED</string>
 
     <string-array name="locations">
         <item>Home</item>

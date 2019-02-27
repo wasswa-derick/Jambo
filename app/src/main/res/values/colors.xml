@@ -8,7 +8,9 @@
     <color name="primaryTextColor">#212121</color>
     <color name="secondaryTextColor">#757575</color>
     <color name="dividerColor">#BDBDBD</color>
-
     <color name="white">#ffffff</color>
+
+    <color name="proceed_disable">#DEDEDE</color>
+    <color name="proceed_enable">#FF5722</color>
 
 </resources>
