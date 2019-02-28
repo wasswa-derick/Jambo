@@ -1,12 +1,21 @@
 package com.rosen.jambo.views.articles;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.rosen.jambo.R;
+import com.rosen.jambo.views.currentlocation.CurrentLocationFragment;
+import com.rosen.jambo.views.currentlocation.LocationHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,13 +24,17 @@ import nl.psdcompany.duonavigationdrawer.views.DuoDrawerLayout;
 import nl.psdcompany.duonavigationdrawer.views.DuoMenuView;
 import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
 
-public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener {
+public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
 
     private MenuAdapter mMenuAdapter;
     private ViewHolder mViewHolder;
     private ArrayList<String> mTitles = new ArrayList<>();
 
     String NEWS_API_KEY = System.getenv("NEWS_API_KEY");
+
+
+    public static LocationHelper locationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
         mTitles = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.locations)));
 
+        Toast.makeText(this, R.string.google_maps_api_key, Toast.LENGTH_SHORT).show();
         // Initialize the views
         mViewHolder = new ViewHolder();
 
@@ -42,9 +56,12 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         // Handle drawer actions
         handleDrawer();
 
+        locationHelper = new LocationHelper(this);
+        locationHelper.checkPermission();
+
 
         // Show main fragment in container
-        goToFragment(new MainFragment(), false);
+        goToFragment(new CurrentLocationFragment(), false);
         mMenuAdapter.setViewSelected(0, true);
         setTitle(mTitles.get(0));
 
@@ -108,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         // Navigate to the right fragment
         switch (position) {
             case 0:
-                goToFragment(new MainFragment(), true);
+                goToFragment(new CurrentLocationFragment(), true);
                 break;
             case 1:
                 //Load articles for Kampala
@@ -131,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
                 goToFragment(new MainFragment(), true);
                 break;
             default:
-                goToFragment(new MainFragment(), false);
+                goToFragment(new CurrentLocationFragment(), false);
                 setTitle(0);
                 break;
         }
@@ -139,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         // Close the drawer
         mViewHolder.mDuoDrawerLayout.closeDrawer();
     }
-
 
     private class ViewHolder {
         private DuoDrawerLayout mDuoDrawerLayout;
@@ -152,4 +168,51 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
             mToolbar = (Toolbar) findViewById(R.id.toolbar);
         }
     }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        locationHelper.onActivityResult(requestCode,resultCode,data);
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        locationHelper.checkPlayServices();
+    }
+
+    /**
+     * Google api callback methods
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Log.i("Connection failed:", " ConnectionResult.getErrorCode() = "
+                + result.getErrorCode());
+    }
+
+    @Override
+    public void onConnected(Bundle arg0) {
+
+        // Once connected with google api, get the location
+        CurrentLocationFragment.mLastLocation = locationHelper.getLocation();
+    }
+
+    @Override
+    public void onConnectionSuspended(int arg0) {
+        locationHelper.connectApiClient();
+    }
+
+
+    // Permission check functions
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        // redirects to utils
+        locationHelper.onRequestPermissionsResult(requestCode,permissions,grantResults);
+
+    }
+
+
+
 }
