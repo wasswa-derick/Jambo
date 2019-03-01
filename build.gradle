@@ -40,6 +40,10 @@ ext {
     dagger2 = '2.13'
     googleService = '16.0.0'
     butterKnife = '8.8.1'
+    googleMaps = '16.1.0'
+    rxJava = '2.2.0'
+    rxAndroid = '2.1.0'
+    lifeCycleExt = '1.1.1'
 }
 
 task clean(type: Delete) {

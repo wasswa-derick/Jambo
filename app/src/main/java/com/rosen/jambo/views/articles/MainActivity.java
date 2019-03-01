@@ -1,5 +1,6 @@
 package com.rosen.jambo.views.articles;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,7 +10,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -19,7 +19,10 @@ import com.rosen.jambo.views.currentlocation.LocationHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import nl.psdcompany.duonavigationdrawer.views.DuoDrawerLayout;
 import nl.psdcompany.duonavigationdrawer.views.DuoMenuView;
 import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
@@ -42,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         setContentView(R.layout.activity_main);
 
         mTitles = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.locations)));
-
-        Toast.makeText(this, R.string.google_maps_api_key, Toast.LENGTH_SHORT).show();
         // Initialize the views
         mViewHolder = new ViewHolder();
 
@@ -67,6 +68,32 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
         mViewHolder.mDuoMenuView.setFooterView(R.layout.footer);
         mViewHolder.mDuoMenuView.setHeaderView(R.layout.header);
+        ArticlesViewModel articlesViewModel = ViewModelProviders.of(this).get(ArticlesViewModel.class);
+
+        articlesViewModel
+                .getAllNewsArticles("Nairobi", getApplicationContext().getResources().getString(R.string.news_api_key))
+                .subscribe(new Observer<List<Article>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(List<Article> articles) {
+                        Log.d("Articles Size .... ", articles.size() + "");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
 
     }
 
