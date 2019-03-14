@@ -44,6 +44,10 @@ ext {
     rxJava = '2.2.0'
     rxAndroid = '2.1.0'
     lifeCycleExt = '1.1.1'
+    okttpV = '3.11.0'
+    okttpUrlConnection = '3.4.2'
+    okttpLogging = '3.10.0'
+    okttpMockWebServer = '3.11.0'
 }
 
 task clean(type: Delete) {

@@ -1,6 +1,6 @@
 package com.rosen.jambo.domain.dependencyinjection
 
-import com.rosen.jambo.domain.data.api.APIService
+import com.rosen.jambo.domain.data.api.ApiService
 import com.rosen.jambo.domain.data.api.RetrofitModule
 import dagger.Module
 import dagger.Provides
@@ -14,8 +14,8 @@ import dagger.Provides
 class RetrofitServiceModule {
 
     @Provides
-    fun provideAPIService(): APIService {
-        return RetrofitModule.getNewsArticlesService()
+    fun provideAPIService(): ApiService {
+        return RetrofitModule().getNewsArticlesService()
     }
 
 }

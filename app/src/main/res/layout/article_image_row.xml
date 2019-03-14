@@ -1,84 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:clickable="true"
-    android:id="@+id/root"
-    android:layout_margin="4dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/white">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <data>
+        <variable
+            name="article"
+            type="com.rosen.jambo.views.articles.Article" />
+    </data>
+
+    <android.support.v7.widget.CardView
+        android:clickable="true"
+        android:focusable="true"
+        android:id="@+id/root"
+        android:layout_margin="4dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/white">
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:id="@+id/headlineImage"
-            android:background="@color/dividerColor"
-            android:scaleType="centerCrop" />
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/headline"
-            android:typeface="sans"
-            android:padding="10dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="4dp"
-            android:text="THE NEW INFORMATION ERA OF INFORMATION IS HERE." />
-
-
-
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:maxHeight="300dp"
+                android:id="@+id/articleImage"
+                app:imageUrl="@{article.urlToImage}"
+                android:background="@color/dividerColor"
+                android:scaleType="centerCrop" />
+
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:paddingEnd="0dp"
-                android:paddingStart="@dimen/activity_horizontal_margin">
+                android:id="@+id/article"
+                android:typeface="sans"
+                android:padding="10dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp"
+                android:text="@{article.title}" />
 
-                <TextView
-                    android:id="@+id/author"
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:textStyle="bold"
-                    android:text="New Vision" />
+                    android:orientation="vertical"
+                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:paddingEnd="0dp"
+                    android:paddingStart="@dimen/activity_horizontal_margin">
+
+                    <TextView
+                        android:id="@+id/author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:textStyle="bold"
+                        android:text="@{article.author}" />
 
 
-                <TextView
-                    android:id="@+id/timestamp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp" />
+                    <TextView
+                        android:id="@+id/timestamp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{article.publishedAt}"
+                        android:layout_marginBottom="8dp" />
 
-            </LinearLayout>
+                </LinearLayout>
 
-            <ImageView
-                android:id="@+id/more"
-                android:layout_width="wrap_content"
-                android:layout_height="24dp"
-                android:layout_gravity="end|center_vertical"
-                android:src="@mipmap/more"
-                android:layout_marginStart="4dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true" />
+            </RelativeLayout>
 
-        </RelativeLayout>
+        </LinearLayout>
 
-    </LinearLayout>
+    </android.support.v7.widget.CardView>
 
-
-
-
-</android.support.v7.widget.CardView>
+</layout>

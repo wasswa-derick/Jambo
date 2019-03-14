@@ -37,6 +37,9 @@
             android:value="@string/google_maps_key" />
 
 
+        <activity android:name=".views.articles.ArticleDetails"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".views.articles.MainActivity" />
     </application>
 
 </manifest>
