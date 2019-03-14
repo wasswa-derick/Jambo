@@ -1,7 +1,9 @@
 package com.rosen.jambo.views.articles;
 
-import android.arch.lifecycle.ViewModelProviders;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -11,28 +13,37 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import android.location.LocationListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.rosen.jambo.R;
 import com.rosen.jambo.views.currentlocation.CurrentLocationFragment;
 import com.rosen.jambo.views.currentlocation.LocationHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 import nl.psdcompany.duonavigationdrawer.views.DuoDrawerLayout;
 import nl.psdcompany.duonavigationdrawer.views.DuoMenuView;
 import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
 
 public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
+        LocationListener, GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
+
+    protected GoogleApiClient mGoogleApiClient;
 
     private MenuAdapter mMenuAdapter;
     private ViewHolder mViewHolder;
     private ArrayList<String> mTitles = new ArrayList<>();
+    public static Location mLastLocation;
 
     String NEWS_API_KEY = System.getenv("NEWS_API_KEY");
 
@@ -60,6 +71,12 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         locationHelper = new LocationHelper(this);
         locationHelper.checkPermission();
 
+        // check availability of play services
+        if (locationHelper.checkPlayServices()) {
+            // Building the GoogleApi client
+            buildGoogleApiClient();
+            locationChecker(mGoogleApiClient, MainActivity.this);
+        }
 
         // Show main fragment in container
         goToFragment(new CurrentLocationFragment(), false);
@@ -68,33 +85,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
         mViewHolder.mDuoMenuView.setFooterView(R.layout.footer);
         mViewHolder.mDuoMenuView.setHeaderView(R.layout.header);
-        ArticlesViewModel articlesViewModel = ViewModelProviders.of(this).get(ArticlesViewModel.class);
-
-        articlesViewModel
-                .getAllNewsArticles("Nairobi", getApplicationContext().getResources().getString(R.string.news_api_key))
-                .subscribe(new Observer<List<Article>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(List<Article> articles) {
-                        Log.d("Articles Size .... ", articles.size() + "");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
-
-
     }
 
     private void handleToolbar() {
@@ -184,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         mViewHolder.mDuoDrawerLayout.closeDrawer();
     }
 
+
     private class ViewHolder {
         private DuoDrawerLayout mDuoDrawerLayout;
         private DuoMenuView mDuoMenuView;
@@ -222,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     public void onConnected(Bundle arg0) {
 
         // Once connected with google api, get the location
-        CurrentLocationFragment.mLastLocation = locationHelper.getLocation();
+//        CurrentLocationFragment.mLastLocation = locationHelper.getLocation();
     }
 
     @Override
@@ -240,6 +231,102 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
     }
 
+    protected synchronized void buildGoogleApiClient() {
 
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .enableAutoManage(this, 34902, this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+    }
+
+    /**
+     * Prompt user to enable GPS and Location Services
+     * @param mGoogleApiClient
+     * @param activity
+     */
+    public static void locationChecker(GoogleApiClient mGoogleApiClient, final Activity activity) {
+        Log.d("Location Checker", " Calling location checker");
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10 * 1000);
+        locationRequest.setFastestInterval(5 * 1000);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                final LocationSettingsStates state = result.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can initialize location
+                        // requests here.
+//                        mLastLocation = locationHelper.getLocation();
+//                        Log.d("lat#", mLastLocation.getLatitude() + "");
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(activity, 1000);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!mGoogleApiClient.isConnecting() || !mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnecting() || mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        //UPDATE MAP
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
 
 }

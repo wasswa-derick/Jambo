@@ -5,10 +5,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -34,7 +38,7 @@ import java.util.Locale;
  */
 
 
-public class LocationHelper implements PermissionUtils.PermissionResultCallback{
+public class LocationHelper implements PermissionUtils.PermissionResultCallback {
 
     private Context context;
     private Activity current_activity;
@@ -49,7 +53,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback{
 
     // list of permissions
 
-    private ArrayList<String> permissions=new ArrayList<>();
+    private ArrayList<String> permissions = new ArrayList<>();
     private PermissionUtils permissionUtils;
 
     private final static int PLAY_SERVICES_REQUEST = 1000;
@@ -57,10 +61,10 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback{
 
     public LocationHelper(Context context) {
 
-        this.context=context;
-        this.current_activity= (Activity) context;
+        this.context = context;
+        this.current_activity = (Activity) context;
 
-        permissionUtils=new PermissionUtils(context,this);
+        permissionUtils = new PermissionUtils(context, this);
 
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -71,8 +75,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback{
      * Method to check the availability of location permissions
      * */
 
-    public void checkPermission()
-    {
+    public void checkPermission() {
         permissionUtils.checkPermission(permissions, "Need GPS permission for getting your location", 1);
     }
 
@@ -92,7 +95,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback{
 
         if (resultCode != ConnectionResult.SUCCESS) {
             if (googleApiAvailability.isUserResolvableError(resultCode)) {
-                googleApiAvailability.getErrorDialog(current_activity,resultCode,
+                googleApiAvailability.getErrorDialog(current_activity, resultCode,
                         PLAY_SERVICES_REQUEST).show();
             } else {
                 showToast("This device is not supported.");
@@ -109,14 +112,10 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback{
     public Location getLocation() {
 
         if (isPermissionGranted()) {
-
-            try
-            {
+            try {
                 mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                 return mLastLocation;
-            }
-            catch (SecurityException e)
-            {
+            } catch (SecurityException e) {
                 e.printStackTrace();
 
             }

@@ -1,11 +1,17 @@
 package com.rosen.jambo.views.currentlocation;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +52,8 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
     double latitude;
     double longitude;
 
-    public CurrentLocationFragment() {}
+    public CurrentLocationFragment() {
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,7 +89,7 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
 
                 } else {
 
-                    if(btnProceed.isEnabled())
+                    if (btnProceed.isEnabled())
                         btnProceed.setEnabled(false);
 
                     showToast("Couldn't get the location. Make sure location is enabled on the device");
@@ -97,12 +104,7 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
             }
         });
 
-        // check availability of play services
-        if (MainActivity.locationHelper.checkPlayServices()) {
 
-            // Building the GoogleApi client
-            MainActivity.locationHelper.buildGoogleApiClient();
-        }
 
         return view;
     }
@@ -173,6 +175,7 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         mSetUpMap();
         mMap.setOnMarkerClickListener(this);
     }
@@ -185,7 +188,7 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         /**clear the map before redraw to them*/
         mMap.clear();
 
-        mLastLocation = MainActivity.locationHelper.getLocation();
+//        mLastLocation = MainActivity.locationHelper.getLocation();
         if (mLastLocation != null) {
             onLocationChanged(mLastLocation);
         }
@@ -209,7 +212,8 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         assetMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
         assetMarker.showInfoWindow();
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10.2f));
 
         float zoomLevel = 5.0f;
         mMap.animateCamera(CameraUpdateFactory.zoomTo(zoomLevel), 2000, null);
