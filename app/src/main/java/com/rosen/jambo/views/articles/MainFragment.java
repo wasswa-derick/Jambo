@@ -10,9 +10,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -40,7 +38,6 @@ public class MainFragment extends Fragment {
 
     RecyclerView articlesRecyclerView;
 
-    GridLayoutManager gridLayoutManager;
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     LinearLayoutManager linearLayoutManager;
 
@@ -148,16 +145,6 @@ public class MainFragment extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void goToFragment(Fragment fragment, boolean addToBackStack) {
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-
-        if (addToBackStack) {
-            transaction.addToBackStack(null);
-        }
-
-        transaction.replace(R.id.container, fragment).commit();
     }
 
     private class PagerAdapter extends android.support.v4.view.PagerAdapter {
