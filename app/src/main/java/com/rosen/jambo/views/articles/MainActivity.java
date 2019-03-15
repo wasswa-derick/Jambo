@@ -1,19 +1,21 @@
 package com.rosen.jambo.views.articles;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-import android.location.LocationListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -36,19 +38,27 @@ import nl.psdcompany.duonavigationdrawer.views.DuoMenuView;
 import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
 
 public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener, GoogleApiClient.ConnectionCallbacks,
-        LocationListener, GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
+        GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
 
     protected GoogleApiClient mGoogleApiClient;
 
     private MenuAdapter mMenuAdapter;
     private ViewHolder mViewHolder;
     private ArrayList<String> mTitles = new ArrayList<>();
-    public static Location mLastLocation;
 
     String NEWS_API_KEY = System.getenv("NEWS_API_KEY");
+    String TAG = "MAIN ACTIVITY";
 
 
     public static LocationHelper locationHelper;
+    private LocationRequest locationRequest;
+    public static int PERMISSION_LOCATION_REQUEST_CODE = 1;
+    public static Location lastLocation;
+
+    // Defined in mili seconds.
+    // This number in extremely low, and should be used only for debug
+    private final int UPDATE_INTERVAL = 120000;
+    private final int FASTEST_INTERVAL = 100000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         handleDrawer();
 
         locationHelper = new LocationHelper(this);
-        locationHelper.checkPermission();
 
         // check availability of play services
         if (locationHelper.checkPlayServices()) {
@@ -207,13 +216,12 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     public void onConnectionFailed(ConnectionResult result) {
         Log.i("Connection failed:", " ConnectionResult.getErrorCode() = "
                 + result.getErrorCode());
+        mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnected(Bundle arg0) {
-
         // Once connected with google api, get the location
-//        CurrentLocationFragment.mLastLocation = locationHelper.getLocation();
     }
 
     @Override
@@ -224,11 +232,22 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
     // Permission check functions
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        // redirects to utils
-        locationHelper.onRequestPermissionsResult(requestCode,permissions,grantResults);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult()");
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted
+                    getLastKnownLocation();
 
+                } else {
+                    Log.w(TAG, "permissionsDenied()");
+                }
+                break;
+            }
+        }
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -267,8 +286,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
                     case LocationSettingsStatusCodes.SUCCESS:
                         // All location settings are satisfied. The client can initialize location
                         // requests here.
-//                        mLastLocation = locationHelper.getLocation();
-//                        Log.d("lat#", mLastLocation.getLatitude() + "");
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied. But could be fixed by showing the user
@@ -290,6 +307,53 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         });
     }
 
+    // Get last known location
+    private void getLastKnownLocation() {
+        Log.d(TAG, "getLastKnownLocation()");
+        if (checkPermission()) {
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (lastLocation != null) {
+                Log.i(TAG, "LasKnown location. " +
+                        "Long: " + lastLocation.getLongitude() +
+                        " | Lat: " + lastLocation.getLatitude());
+                startLocationUpdates();
+            } else {
+                Log.w(TAG, "No location retrieved yet");
+                startLocationUpdates();
+            }
+        } else askPermission();
+    }
+
+    // Start location Updates
+    public void startLocationUpdates() {
+        Log.i(TAG, "startLocationUpdates()");
+        locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(UPDATE_INTERVAL)
+                .setFastestInterval(FASTEST_INTERVAL);
+
+        if (checkPermission())
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, (com.google.android.gms.location.LocationListener) this);
+    }
+
+    // Check for permission to access Location
+    private boolean checkPermission() {
+        Log.d(TAG, "checkPermission()");
+        // Ask for permission if it wasn't granted yet
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+
+    // Asks for permission
+    private void askPermission() {
+        Log.d(TAG, "askPermission()");
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                1
+        );
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -304,28 +368,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         if (mGoogleApiClient.isConnecting() || mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
-        //UPDATE MAP
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
 
     }
 

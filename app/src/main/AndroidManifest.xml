@@ -40,6 +40,7 @@
         <activity android:name=".views.articles.ArticleDetails"
             android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".views.articles.MainActivity" />
+
     </application>
 
 </manifest>
