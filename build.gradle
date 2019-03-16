@@ -48,6 +48,7 @@ ext {
     okttpUrlConnection = '3.4.2'
     okttpLogging = '3.10.0'
     okttpMockWebServer = '3.11.0'
+    roomVersion = '1.1.1'
 }
 
 task clean(type: Delete) {

@@ -88,6 +88,12 @@ dependencies {
         exclude module: ['exifinterface', 'support-annotations']
     }
 
+
+    // Room components
+    implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
+    kapt "android.arch.persistence.room:compiler:$rootProject.roomVersion"
+    androidTestImplementation "android.arch.persistence.room:testing:$rootProject.roomVersion"
+
 }
 repositories {
     mavenCentral()

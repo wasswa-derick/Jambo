@@ -61,7 +61,7 @@ public class MainFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        articlesViewModel = ViewModelProviders.of(this).get(ArticlesViewModel.class);
+        articlesViewModel = ViewModelProviders.of(this, new ArticleViewModelFactory(requireActivity().getApplication())).get(ArticlesViewModel.class);
 
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         linearLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false);
@@ -110,7 +110,7 @@ public class MainFragment extends Fragment {
 
                         articleList.addAll(articles);
                         articlesAdapter.notifyDataSetChanged();
-
+                        articlesViewModel.saveTagArticles(articles, requireActivity().getTitle().toString());
                     }
 
                     @Override
@@ -147,8 +147,6 @@ public class MainFragment extends Fragment {
 
             }
         }));
-
-
         return view;
     }
 

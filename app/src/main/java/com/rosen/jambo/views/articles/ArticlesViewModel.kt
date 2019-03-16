@@ -1,5 +1,6 @@
 package com.rosen.jambo.views.articles
 
+import android.app.Application
 import android.arch.lifecycle.ViewModel
 import com.rosen.jambo.domain.data.repository.impl.NewsRepositoryImpl
 import io.reactivex.Observable
@@ -9,11 +10,16 @@ import io.reactivex.Observable
  * Github: @wasswa-derick
  * Andela (Kampala, Uganda)
  */
-class ArticlesViewModel : ViewModel() {
+class ArticlesViewModel(application: Application?) : ViewModel() {
 
-    private val repository: NewsRepositoryImpl = NewsRepositoryImpl()
+    private var mApplication: Application? = null
+
+    init {
+        mApplication = application
+    }
+
+    private val repository: NewsRepositoryImpl = NewsRepositoryImpl(mApplication)
     private var articles: List<Articles> = listOf()
-//    internal var articles: MutableList<Article> = ArrayList()
 
 
     fun getAllNewsArticles(location : String, apiKey : String): Observable<MutableList<Article>>? {
@@ -21,6 +27,18 @@ class ArticlesViewModel : ViewModel() {
                 .flatMap {
                     Observable.just(it.articles)
                 }
+    }
+
+    fun getOfflineArticlesByTag(articleTag : String) {
+        repository.getArticlesBy(articleTag)
+    }
+
+    fun saveTagArticles(articles : List<Article>, articleTag: String) {
+        repository.saveUsers(articles, articleTag)
+    }
+
+    fun deleteTagArticles(articleTag: String) {
+        repository.deleteTagArticles(articleTag)
     }
 
     fun getArticleList(): Observable<List<Article>> {

@@ -1,7 +1,12 @@
 package com.rosen.jambo.views.articles;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -11,42 +16,58 @@ import com.google.gson.annotations.SerializedName;
  * Github: @wasswa-derick
  * Andela (Kampala, Uganda)
  */
+@Entity(tableName = "article")
 public class Article implements Parcelable {
 
+    @PrimaryKey
+    @ColumnInfo(name = "id")
+    @NonNull
+    private String id;
+
+    @ColumnInfo(name = "author")
     @SerializedName("author")
     @Expose
     private String author;
 
+    @ColumnInfo(name = "title")
     @SerializedName("title")
     @Expose
     private String title;
 
+    @ColumnInfo(name = "description")
     @SerializedName("description")
     @Expose
     private String description;
 
+    @ColumnInfo(name = "url")
     @SerializedName("url")
     @Expose
     private String url;
 
+    @ColumnInfo(name = "urlToImage")
     @SerializedName("urlToImage")
     @Expose
     private String urlToImage;
 
+    @ColumnInfo(name = "publishedAt")
     @SerializedName("publishedAt")
     @Expose
     private String publishedAt;
 
+    @ColumnInfo(name = "content")
     @SerializedName("content")
     @Expose
     private String content;
 
+    @Ignore
     @SerializedName("source")
     @Expose
     private Source source;
 
+    @Ignore
     public Article(){}
 
+    @Ignore
     public Article(String author, String title, String description, String url, String urlToImage, String publishedAt, String content, Source source) {
         this.author = author;
         this.title = title;
@@ -58,6 +79,18 @@ public class Article implements Parcelable {
         this.source = source;
     }
 
+    public Article(String author, String title, String description, String url, String urlToImage, String publishedAt, String content, String id) {
+        this.author = author;
+        this.title = title;
+        this.description = description;
+        this.url = url;
+        this.urlToImage = urlToImage;
+        this.publishedAt = publishedAt;
+        this.content = content;
+        this.id = id;
+    }
+
+    @Ignore
     protected Article(Parcel in) {
         author = in.readString();
         title = in.readString();
@@ -142,6 +175,14 @@ public class Article implements Parcelable {
 
     public void setSource(Source source) {
         this.source = source;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public static Creator<Article> getCREATOR() {

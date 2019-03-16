@@ -19,4 +19,6 @@ interface NewsInterfaceRepository {
 
     fun saveUsers(articles: List<Article>, location: String)
 
+    fun deleteTagArticles(location: String)
+
 }
