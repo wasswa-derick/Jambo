@@ -41,6 +41,9 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".views.articles.MainActivity" />
 
+        <activity android:name=".views.articles.MoreDetailsActivity"
+            android:parentActivityName=".views.articles.ArticleDetails" />
+
     </application>
 
 </manifest>

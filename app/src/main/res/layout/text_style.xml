@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:padding="@dimen/text_styles"
+    android:layout_height="wrap_content">
+
+
+    <RadioGroup
+        android:id="@+id/text_styles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/roboto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Roboto" />
+
+        <RadioButton
+            android:id="@+id/journal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Journal" />
+
+        <RadioButton
+            android:id="@+id/lobster"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Lobster" />
+
+        <RadioButton
+            android:id="@+id/dancing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Dancing Script" />
+
+        <RadioButton
+            android:id="@+id/walkway"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Walkway" />
+
+        <RadioButton
+            android:id="@+id/gooddog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Gooddog" />
+
+    </RadioGroup>
+
+
+
+</LinearLayout>

@@ -2,12 +2,17 @@ package com.rosen.jambo.views.articles;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -15,6 +20,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,6 +34,7 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.rosen.jambo.R;
+import com.rosen.jambo.utils.NetworkConnectionDetector;
 import com.rosen.jambo.views.currentlocation.CurrentLocationFragment;
 import com.rosen.jambo.views.currentlocation.LocationHelper;
 
@@ -44,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
     private MenuAdapter mMenuAdapter;
     private ViewHolder mViewHolder;
+    Snackbar snackbar;
     private ArrayList<String> mTitles = new ArrayList<>();
 
     String NEWS_API_KEY = System.getenv("NEWS_API_KEY");
@@ -55,16 +63,18 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     public static int PERMISSION_LOCATION_REQUEST_CODE = 1;
     public static Location lastLocation;
 
-    // Defined in mili seconds.
-    // This number in extremely low, and should be used only for debug
-    private final int UPDATE_INTERVAL = 120000;
-    private final int FASTEST_INTERVAL = 100000;
+    private static final int UPDATE_INTERVAL = 120000;
+    private static final int FASTEST_INTERVAL = 100000;
+
+    //  Broadcast event for internet connectivity
+    BroadcastReceiver networkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        snackbar = Snackbar.make(findViewById(R.id.drawer), R.string.no_internet, Snackbar.LENGTH_INDEFINITE);
         mTitles = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.locations)));
         // Initialize the views
         mViewHolder = new ViewHolder();
@@ -94,6 +104,34 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
         mViewHolder.mDuoMenuView.setFooterView(R.layout.footer);
         mViewHolder.mDuoMenuView.setHeaderView(R.layout.header);
+
+        checkNetworkConnection();
+    }
+
+    private void checkNetworkConnection() {
+        // Network Utility
+        networkStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Boolean connection = new NetworkConnectionDetector(getApplicationContext()).InternetConnectionStatus();
+                if (!connection) {
+                    //dismissProgressDialog();
+
+                    snackbar.setAction(R.string.connect, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+                                    startActivity(settingsIntent);
+                                }
+                            }).show();
+
+                    // FETCH LOCATION ARTICLES FOR
+                } else {
+                    snackbar.dismiss();
+                }
+            }
+        };
+        registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     private void handleToolbar() {
@@ -207,6 +245,15 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     public void onResume() {
         super.onResume();
         locationHelper.checkPlayServices();
+        //  register broadcast receive once activity is in the foreground
+        registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        // disconnect expensive broadcast receiver
+        unregisterReceiver(networkStateReceiver);
+        super.onPause();
     }
 
     /**

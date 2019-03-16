@@ -7,6 +7,8 @@
     <string name="pick_location">PICK LOCATION</string>
     <string name="current_location_pick">Welcome! Where are you at?</string>
     <string name="proceed">PROCEED</string>
+    <string name="connect">Connect Internet</string>
+    <string name="copyContent">Copy</string>
 
     <string-array name="locations">
         <item>Home</item>
@@ -25,6 +27,5 @@
 
     <string name="mores">More</string>
     <string name="share">Share</string>
-    <string name="copy">Copy</string>
 
 </resources>

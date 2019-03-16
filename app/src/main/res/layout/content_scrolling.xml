@@ -73,10 +73,9 @@
                 android:layout_gravity="center_vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/htmlUrl"
+                android:onClick="webViewDetails"
                 android:text="@{article.url}"
-                android:textStyle="bold"
-                android:linksClickable="true"
-                android:autoLink="web"
+                app:webLink="@{article.url}"
                 android:gravity="center_vertical|center_horizontal"
                 android:typeface="sans" />
 
