@@ -29,8 +29,8 @@ class ArticlesViewModel(application: Application?) : ViewModel() {
                 }
     }
 
-    fun getOfflineArticlesByTag(articleTag : String) {
-        repository.getArticlesBy(articleTag)
+    fun getOfflineArticlesByTag(articleTag : String) : List<Article> {
+        return repository.getArticlesBy(articleTag)
     }
 
     fun saveTagArticles(articles : List<Article>, articleTag: String) {

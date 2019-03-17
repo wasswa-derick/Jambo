@@ -1,178 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    tools:context=".views.articles.ArticleDetails">
 
-    <LinearLayout
-        android:id="@+id/header"
-        android:orientation="horizontal"
-        android:background="@color/primaryColor"
-        android:paddingTop="@dimen/activity_horizontal_margin"
-        android:paddingBottom="@dimen/activity_horizontal_margin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <data>
+        <variable
+            name="fragment_model"
+            type="com.rosen.jambo.views.articles.FragmentModel" />
 
-        <ImageView
-            android:layout_gravity="center"
-            android:src="@drawable/get_location"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_marginEnd="0dp"
-            android:layout_width="24dp"
-            android:layout_height="24dp" />
+    </data>
 
-        <TextView
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_marginEnd="0dp"
-            android:layout_gravity="center"
-            android:text="@string/current_location_pick"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
-    <android.support.v7.widget.CardView
-        card_view:elevation="4dp"
-        android:layout_margin="8dp"
-        android:layout_below="@+id/header"
-        android:id="@+id/card_view"
-        android:layout_gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        card_view:cardCornerRadius="1dp">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:id="@+id/rlAddress"
-                android:layout_alignParentTop="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-
-                <fragment
-                    android:id="@+id/map"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="260dp" />
-
-                <TextView
-                    android:id="@+id/tvAddress"
-                    android:text=""
-                    android:padding="@dimen/activity_horizontal_margin"
-                    android:visibility="gone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/tvEmpty"
-                    android:padding="@dimen/activity_horizontal_margin"
-                    android:text="@string/pick_address"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <View
-                android:layout_below="@+id/rlAddress"
-                android:id="@+id/divider"
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#E1E1E1"
-                />
-
-            <RelativeLayout
-                android:id="@+id/rlPickLocation"
-                android:layout_below="@id/divider"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:layout_centerInParent="true"
-                    android:padding="8dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <ImageView
-                        android:src="@drawable/ic_pick"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp" />
-
-                    <TextView
-                        android:layout_gravity="center_vertical"
-                        android:id="@+id/textView"
-                        android:textSize="18sp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/pick_location"
-                        android:textColor="@color/primaryColor" />
-
-                </LinearLayout>
-
-            </RelativeLayout>
-
-        </RelativeLayout>
-
-
-
-    </android.support.v7.widget.CardView>
-
-    <Button
-        android:enabled="false"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        style="@style/proceedButtonStyle"
-        android:id="@+id/btnLocation"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/proceed" />
-
-    <LinearLayout
-        android:visibility="gone"
-        android:orientation="vertical"
-        android:id="@+id/root"
-        android:padding="@dimen/article_list"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:visibility="gone"
-            android:id="@+id/no_jambos"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="36dp"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:text="@string/no_items"
-            android:textColor="@color/secondaryTextColor" />
-
-        <ProgressBar
-            android:id="@+id/progressbar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:max="100"
-            android:visibility="gone"
-            android:backgroundTint="@color/white"
-            android:indeterminateTint="@color/accentColor"
-            android:padding="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="7dp"/>
-
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/articles_list"
+        <LinearLayout
+            android:id="@+id/header"
+            android:orientation="horizontal"
+            android:background="@color/primaryColor"
+            android:paddingTop="@dimen/activity_horizontal_margin"
+            android:paddingBottom="@dimen/activity_horizontal_margin"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="wrap_content">
 
-    </LinearLayout>
+            <ImageView
+                android:layout_gravity="center"
+                android:src="@drawable/get_location"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginEnd="0dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp" />
 
-</RelativeLayout>
+            <TextView
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginEnd="0dp"
+                android:layout_gravity="center"
+                android:text="@string/current_location_pick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.CardView
+            card_view:elevation="4dp"
+            android:layout_margin="8dp"
+            android:layout_below="@+id/header"
+            android:id="@+id/card_view"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card_view:cardCornerRadius="1dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:id="@+id/rlAddress"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <fragment
+                        android:id="@+id/map"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="260dp" />
+
+                    <TextView
+                        android:id="@+id/tvAddress"
+                        android:text=""
+                        android:padding="@dimen/activity_horizontal_margin"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/tvEmpty"
+                        android:padding="@dimen/activity_horizontal_margin"
+                        android:text="@string/pick_address"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_below="@+id/rlAddress"
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#E1E1E1"
+                    />
+
+                <RelativeLayout
+                    android:id="@+id/rlPickLocation"
+                    android:layout_below="@id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_centerInParent="true"
+                        android:padding="8dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:src="@drawable/ic_pick"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp" />
+
+                        <TextView
+                            android:layout_gravity="center_vertical"
+                            android:id="@+id/textView"
+                            android:textSize="18sp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="@string/pick_location"
+                            android:textColor="@color/primaryColor" />
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+
+
+        </android.support.v7.widget.CardView>
+
+        <Button
+            android:enabled="false"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            style="@style/proceedButtonStyle"
+            android:id="@+id/btnLocation"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/proceed" />
+
+        <LinearLayout
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:id="@+id/root"
+            android:padding="@dimen/article_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/no_jambos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="36dp"
+                android:textStyle="bold"
+                android:visibility="@{!fragment_model.emptyList}"
+                android:textSize="22sp"
+                android:text="@string/no_items"
+                android:textColor="@color/secondaryTextColor" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:backgroundTint="@color/white"
+                android:indeterminateTint="@color/accentColor"
+                android:max="100"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="7dp"
+                android:visibility="@{!fragment_model.loadingArticles}"
+                android:layout_height="wrap_content" />
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/articles_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</layout>

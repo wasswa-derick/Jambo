@@ -19,9 +19,7 @@ import com.google.gson.annotations.SerializedName;
 @Entity(tableName = "article")
 public class Article implements Parcelable {
 
-    @PrimaryKey
     @ColumnInfo(name = "id")
-    @NonNull
     private String id;
 
     @ColumnInfo(name = "author")
@@ -29,7 +27,9 @@ public class Article implements Parcelable {
     @Expose
     private String author;
 
+    @PrimaryKey
     @ColumnInfo(name = "title")
+    @NonNull
     @SerializedName("title")
     @Expose
     private String title;

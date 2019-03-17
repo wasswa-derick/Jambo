@@ -3,9 +3,12 @@ package com.rosen.jambo.views.articles;
 
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -18,7 +21,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,8 +31,11 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rosen.jambo.R;
+import com.rosen.jambo.databinding.FragmentMainBinding;
+import com.rosen.jambo.utils.NetworkConnectionDetector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +61,11 @@ public class MainFragment extends Fragment {
     private SharedPreferences.OnSharedPreferenceChangeListener prefListener;
     SharedPreferences prefs;
 
+    //  Broadcast event for internet connectivity
+    BroadcastReceiver networkStateReceiver;
+
+    FragmentModel fragmentModel;
+    FragmentMainBinding binding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,30 +79,68 @@ public class MainFragment extends Fragment {
         //listener on changed sort text preference:
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-
-        prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                if(key.equals("text_style")){
-                    Log.d("Prefernces Changes", "Yes");
-                    //setFont(holder, prefs.getString("text_style","1"));
-                }
-            }
-        };
         prefs.registerOnSharedPreferenceChangeListener(prefListener);
     }
 
     @SuppressLint("CheckResult")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main, container, false);
+        View view = binding.getRoot();
+
+        fragmentModel = new FragmentModel();
+        fragmentModel.loadingArticles = true;
+        fragmentModel.emptyList = false;
+        binding.setFragmentModel(fragmentModel);
+
         articlesRecyclerView = view.findViewById(R.id.articles_list);
 
         articlesAdapter = new ArticlesAdapter(requireActivity(), articleList);
         articlesRecyclerView.setAdapter(articlesAdapter);
         articlesRecyclerView.setLayoutManager(staggeredGridLayoutManager);
 
+        checkNetworkConnection();
 
+        getArticleDetails();
+
+        return view;
+    }
+
+    public void getOfflineArticles(String articleTag){
+        articleList.addAll(articlesViewModel.getOfflineArticlesByTag(articleTag));
+        articlesAdapter.notifyDataSetChanged();
+        fragmentModel.setLoadingArticles(false);
+
+        if (articleList.isEmpty()) {
+            fragmentModel.setEmptyList(true);
+        } else {
+            fragmentModel.setEmptyList(false);
+        }
+
+        binding.setFragmentModel(fragmentModel);
+    }
+
+    private void checkNetworkConnection() {
+        // Network Utility
+        networkStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Boolean connection = new NetworkConnectionDetector(requireActivity().getApplicationContext()).InternetConnectionStatus();
+                if (!connection) {
+                    if (articleList.isEmpty()) {
+                        Toast.makeText(context, "online articles still here", Toast.LENGTH_SHORT).show();
+                        getOfflineArticles(requireActivity().getTitle().toString());
+                    }
+                } else {
+                    fetchAPIArticles();
+                }
+            }
+        };
+        requireActivity().registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    private void fetchAPIArticles() {
         articlesViewModel.getAllNewsArticles(requireActivity().getTitle().toString(), requireActivity().getResources().getString(R.string.news_api_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -120,10 +168,20 @@ public class MainFragment extends Fragment {
 
                     @Override
                     public void onComplete() {
+                        fragmentModel.setLoadingArticles(false);
 
+                        if (articleList.isEmpty()) {
+                            fragmentModel.setEmptyList(true);
+                        } else {
+                            fragmentModel.setEmptyList(false);
+                        }
+
+                        binding.setFragmentModel(fragmentModel);
                     }
                 });
+    }
 
+    private void getArticleDetails() {
         articlesRecyclerView.addOnItemTouchListener(new ArticleListClick(requireActivity(), new ArticleListClick.OnItemClickListener() {
             @Override
             public void onItemClick(View childView, int position) {
@@ -147,9 +205,7 @@ public class MainFragment extends Fragment {
 
             }
         }));
-        return view;
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
