@@ -1,42 +1,55 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:id="@+id/root"
-    android:padding="@dimen/article_list"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".views.articles.ArticleDetails">
 
+    <data>
+        <variable
+            name="fragment_model"
+            type="com.rosen.jambo.views.articles.FragmentModel" />
 
-    <TextView
-        android:visibility="gone"
-        android:id="@+id/no_jambos"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="36dp"
-        android:textStyle="bold"
-        android:textSize="22sp"
-        android:text="@string/no_items"
-        android:textColor="@color/secondaryTextColor" />
+    </data>
 
-    <ProgressBar
-        android:id="@+id/progressbar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:max="100"
-        android:visibility="gone"
-        android:backgroundTint="@color/white"
-        android:indeterminateTint="@color/accentColor"
-        android:padding="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="7dp"/>
-
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/articles_list"
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/root"
+        android:padding="@dimen/article_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent">
 
-</LinearLayout>
+
+        <TextView
+            android:visibility="@{!fragment_model.emptyList}"
+            android:id="@+id/no_jambos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="36dp"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:text="@string/no_items"
+            android:textColor="@color/secondaryTextColor" />
+
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/white"
+            android:indeterminateTint="@color/accentColor"
+            android:max="100"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="7dp"
+            android:visibility="@{!fragment_model.loadingArticles}"
+            android:layout_height="wrap_content" />
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/articles_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+    </LinearLayout>
+
+</layout>

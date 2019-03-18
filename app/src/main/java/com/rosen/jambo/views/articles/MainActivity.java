@@ -26,6 +26,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.LocationServices;
@@ -45,7 +46,7 @@ import nl.psdcompany.duonavigationdrawer.views.DuoMenuView;
 import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
 
 public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
+        LocationListener, GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
 
     protected GoogleApiClient mGoogleApiClient;
 
@@ -125,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
                                 }
                             }).show();
 
-                    // FETCH LOCATION ARTICLES FOR
                 } else {
                     snackbar.dismiss();
                 }
@@ -219,6 +219,11 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
         // Close the drawer
         mViewHolder.mDuoDrawerLayout.closeDrawer();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
     }
 
 

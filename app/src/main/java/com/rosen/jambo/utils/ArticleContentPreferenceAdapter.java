@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.TextView;
 
 import java.util.Random;
@@ -20,6 +21,11 @@ public class ArticleContentPreferenceAdapter {
 
     static SharedPreferences prefs;
     static SharedPreferences.OnSharedPreferenceChangeListener prefListener;
+
+    @BindingAdapter("android:visibility")
+    public static void setVisibility(View view, Boolean visible) {
+        view.setVisibility(visible ? View.GONE : View.VISIBLE);
+    }
 
     @BindingAdapter({"bind:textPref"})
     public static void setTextPrefs(TextView textView, String text) {

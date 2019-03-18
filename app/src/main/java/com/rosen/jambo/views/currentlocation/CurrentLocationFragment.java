@@ -2,8 +2,12 @@ package com.rosen.jambo.views.currentlocation;
 
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.databinding.DataBindingUtil;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
@@ -39,14 +43,18 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.rosen.jambo.R;
+import com.rosen.jambo.databinding.CurrentLocationBinding;
+import com.rosen.jambo.utils.NetworkConnectionDetector;
 import com.rosen.jambo.views.articles.Article;
 import com.rosen.jambo.views.articles.ArticleDetails;
 import com.rosen.jambo.views.articles.ArticleListClick;
+import com.rosen.jambo.views.articles.ArticleViewModelFactory;
 import com.rosen.jambo.views.articles.ArticlesAdapter;
 import com.rosen.jambo.views.articles.ArticlesViewModel;
+import com.rosen.jambo.views.articles.FragmentModel;
 import com.rosen.jambo.views.articles.MainActivity;
 
+import com.rosen.jambo.R;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,6 +97,13 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
     double longitude;
     String city;
 
+    FragmentModel fragmentModel;
+
+    //  Broadcast event for internet connectivity
+    BroadcastReceiver networkStateReceiver;
+
+    CurrentLocationBinding binding;
+
     public CurrentLocationFragment() {
     }
 
@@ -98,7 +113,7 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         setHasOptionsMenu(true);
 
 
-        articlesViewModel = ViewModelProviders.of(this).get(ArticlesViewModel.class);
+        articlesViewModel = ViewModelProviders.of(this, new ArticleViewModelFactory(requireActivity().getApplication())).get(ArticlesViewModel.class);
 
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         linearLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false);
@@ -106,7 +121,13 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.current_location, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.current_location, container, false);
+        View view = binding.getRoot();
+
+        fragmentModel = new FragmentModel();
+        fragmentModel.setLoadingArticles(true);
+        fragmentModel.setEmptyList(true);
+        binding.setFragmentModel(fragmentModel);
 
         btnProceed = view.findViewById(R.id.btnLocation);
         tvAddress = view.findViewById(R.id.tvAddress);
@@ -120,6 +141,8 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         final SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        initialiseArticleList(view);
 
         rlPick.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,20 +169,53 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         btnProceed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                header.setVisibility(View.GONE);
-                btnProceed.setVisibility(View.GONE);
-                mapCard.setVisibility(View.GONE);
-                listRoot.setVisibility(View.VISIBLE);
-                showToast("News articles for " + city);
-                requireActivity().setTitle(city);
-                getArticlesForCurrentLocation(city);
+                if (city != null) {
+                    header.setVisibility(View.GONE);
+                    btnProceed.setVisibility(View.GONE);
+                    mapCard.setVisibility(View.GONE);
+                    listRoot.setVisibility(View.VISIBLE);
+                    showToast("News articles for " + city);
+                    requireActivity().setTitle(city);
+
+                    checkNetworkConnection(binding);
+
+                }
             }
         });
 
-        initialiseArticleList(view);
-
-
         return view;
+    }
+
+    public void getOfflineArticles(String articleTag){
+        articleList.addAll(articlesViewModel.getOfflineArticlesByTag(articleTag));
+        articlesAdapter.notifyDataSetChanged();
+        fragmentModel.setLoadingArticles(false);
+
+        if (articleList.isEmpty()) {
+            fragmentModel.setEmptyList(true);
+        } else {
+            fragmentModel.setEmptyList(false);
+        }
+
+        binding.setFragmentModel(fragmentModel);
+    }
+
+    private void checkNetworkConnection(CurrentLocationBinding binding) {
+        // Network Utility
+        networkStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Boolean connection = new NetworkConnectionDetector(requireActivity().getApplicationContext()).InternetConnectionStatus();
+                if (!connection) {
+                    if (articleList.isEmpty()) {
+                        getOfflineArticles(requireActivity().getTitle().toString());
+                    }
+                } else {
+                    getArticlesForCurrentLocation(city, binding);
+                }
+            }
+        };
+        requireActivity().registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
@@ -215,7 +271,7 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         }));
     }
 
-    private void getArticlesForCurrentLocation (String currentLocation) {
+    private void getArticlesForCurrentLocation (String currentLocation, CurrentLocationBinding binding) {
         articlesViewModel.getAllNewsArticles(currentLocation, requireActivity().getResources().getString(R.string.news_api_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -229,6 +285,8 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
                     public void onNext(List<Article> articles) {
                         if (!articleList.isEmpty()) {
                             articleList.clear();
+                        } else {
+                            fragmentModel.setEmptyList(false);
                         }
 
                         articleList.addAll(articles);
@@ -243,7 +301,13 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
 
                     @Override
                     public void onComplete() {
+                        fragmentModel.setLoadingArticles(false);
 
+                        if (articleList.isEmpty()) {
+                            fragmentModel.setEmptyList(true);
+                        }
+
+                        binding.setFragmentModel(fragmentModel);
                     }
                 });
     }
