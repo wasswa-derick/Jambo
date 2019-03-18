@@ -105,23 +105,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         return true;
     }
 
-    /**
-     * Method to display the location on UI
-     * */
-
-    public Location getLocation() {
-
-        if (isPermissionGranted()) {
-            try {
-                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                return mLastLocation;
-            } catch (SecurityException e) {
-                e.printStackTrace();
-
-            }
-        }
-        return null;
-    }
 
     public Address getAddress(double latitude, double longitude)
     {
@@ -142,76 +125,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
     }
 
 
-    /**
-     * Method used to build GoogleApiClient
-     */
-
-    public void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) current_activity)
-                .addOnConnectionFailedListener((GoogleApiClient.OnConnectionFailedListener) current_activity)
-                .build();
-
-        mGoogleApiClient.connect();
-
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
-
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
-
-                final Status status = locationSettingsResult.getStatus();
-
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can initialize location requests here
-                        mLastLocation=getLocation();
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(current_activity, REQUEST_CHECK_SETTINGS);
-
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        break;
-                }
-            }
-        });
-
-
-    }
-
-    /**
-     * Method used to connect GoogleApiClient
-     */
-    public void connectApiClient()
-    {
-        mGoogleApiClient.connect();
-    }
-
-    /**
-     * Method used to get the GoogleApiClient
-     */
-    public GoogleApiClient getGoogleApiCLient()
-    {
-        return mGoogleApiClient;
-    }
-
 
     /**
      * Handles the permission results
@@ -230,7 +143,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
                 switch (resultCode) {
                     case Activity.RESULT_OK:
                         // All required changes were successfully made
-                        mLastLocation = getLocation();
                         break;
                     case Activity.RESULT_CANCELED:
                         // The user was asked to change settings, but chose not to

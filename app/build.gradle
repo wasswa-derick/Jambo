@@ -1,8 +1,10 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply from: "$project.rootDir/config/jacoco.gradle"
 
 android {
+
     compileSdkVersion rootProject.myCompileSdkVersion
     defaultConfig {
         applicationId "com.rosen.jambo"
@@ -11,20 +13,40 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
+
     buildTypes {
 
-             debug {
-                 resValue 'string', "google_maps_api_key", project.hasProperty('GOOGLE_MAPS_API_KEY') ? GOOGLE_MAPS_API_KEY : System.getenv('GOOGLE_MAPS_API_KEY')
-                 resValue 'string', "news_api_key", project.hasProperty('NEWS_API_KEY') ? NEWS_API_KEY : System.getenv('NEWS_API_KEY')
-             }
+        debug {
+            resValue 'string', "google_maps_api_key", project.hasProperty('GOOGLE_MAPS_API_KEY') ? GOOGLE_MAPS_API_KEY : System.getenv('GOOGLE_MAPS_API_KEY')
+            resValue 'string', "news_api_key", project.hasProperty('NEWS_API_KEY') ? NEWS_API_KEY : System.getenv('NEWS_API_KEY')
 
-             release {
-                 minifyEnabled false
-                 proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-                 resValue 'string', "google_maps_api_key", project.hasProperty('GOOGLE_MAPS_API_KEY') ? GOOGLE_MAPS_API_KEY : System.getenv('GOOGLE_MAPS_API_KEY')
-                 resValue 'string', "news_api_key", project.hasProperty('NEWS_API_KEY') ? NEWS_API_KEY : System.getenv('NEWS_API_KEY')
-             }
+            debuggable true
+            multiDexEnabled true
+
+            //add tests coverage using Jacoco
+            testCoverageEnabled true
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            resValue 'string', "google_maps_api_key", project.hasProperty('GOOGLE_MAPS_API_KEY') ? GOOGLE_MAPS_API_KEY : System.getenv('GOOGLE_MAPS_API_KEY')
+            resValue 'string', "news_api_key", project.hasProperty('NEWS_API_KEY') ? NEWS_API_KEY : System.getenv('NEWS_API_KEY')
+        }
+    }
+
+    sourceSets {
+        debug.manifest.srcFile 'debug/AndroidManifest.xml'
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+        }
+        animationsDisabled = false
     }
 
     dataBinding {
@@ -39,6 +61,7 @@ android {
         generateStubs = true
     }
 
+
 }
 
 dependencies {
@@ -48,9 +71,23 @@ dependencies {
     implementation "com.android.support.constraint:constraint-layout:$rootProject.constraintLayoutVersion"
     implementation "com.google.android.gms:play-services-maps:$rootProject.googleMaps"
     implementation 'com.android.support:appcompat-v7:28.0.0'
+
     testImplementation "junit:junit:$rootProject.junitVersion"
     androidTestImplementation "com.android.support.test:runner:$rootProject.testRunnerVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.expressoVersion"
+    androidTestImplementation "com.android.support:support-annotations:$rootProject.supportLibraryVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$rootProject.expressoVersion"
+
+    testImplementation 'org.mockito:mockito-core:2.23.0'
+    testImplementation 'org.mockito:mockito-inline:2.23.0'
+
+    // Set this dependency to use JUnit 4 rules
+    androidTestImplementation("com.android.support.test:rules:$rootProject.testRulesVersion") {
+        exclude module: 'support-annotations'
+    }
+
+
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation "nl.psdcompany:duo-navigation-drawer:$drawer"
@@ -65,7 +102,6 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
     implementation "com.squareup.okhttp3:okhttp:$rootProject.okttpV"
     implementation "com.squareup.okhttp3:okhttp-urlconnection:$rootProject.okttpUrlConnection"
-    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.okttpLogging"
     implementation "com.squareup.okhttp3:mockwebserver:$rootProject.okttpMockWebServer"
 
     // Dependency Injection
@@ -74,7 +110,7 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$rootProject.dagger2"
 
     implementation "com.google.android.gms:play-services-location:$rootProject.googleService"
-    implementation "com.jakewharton:butterknife:$rootProject.butterKnife"
+    kapt "com.jakewharton:butterknife:$rootProject.butterKnife"
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterKnife"
 
     // RxJava 2
@@ -83,18 +119,24 @@ dependencies {
 
     implementation "android.arch.lifecycle:extensions:$rootProject.lifeCycleExt"
 
-    implementation ('com.squareup.picasso:picasso:2.71828') {
+    implementation('com.squareup.picasso:picasso:2.71828') {
         exclude group: 'com.android.support'
         exclude module: ['exifinterface', 'support-annotations']
     }
-
 
     // Room components
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
     kapt "android.arch.persistence.room:compiler:$rootProject.roomVersion"
     androidTestImplementation "android.arch.persistence.room:testing:$rootProject.roomVersion"
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+
+    implementation 'com.github.AravindVijay7:GeoLocator-Android:1.0.2'
+    implementation ('com.github.ankitdubey021:GPSTracker:2.0') {
+        exclude  group:'com.google.android.gms'
+    }
 
 }
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }

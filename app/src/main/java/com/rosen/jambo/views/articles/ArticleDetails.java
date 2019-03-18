@@ -34,6 +34,9 @@ public class ArticleDetails extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (toolbar != null) {
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         Intent intent = getIntent();
         Bundle bundle = intent.getBundleExtra("data");
@@ -95,6 +98,10 @@ public class ArticleDetails extends AppCompatActivity {
             return true;
         }
 
+        if (id == android.R.id.home) {
+            finish();
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -118,5 +125,11 @@ public class ArticleDetails extends AppCompatActivity {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

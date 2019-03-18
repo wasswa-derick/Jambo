@@ -11,12 +11,12 @@
     <string name="copyContent">Copy</string>
 
     <string-array name="locations">
-        <item>Home</item>
         <item>Kampala</item>
         <item>Nairobi</item>
         <item>Lagos</item>
         <item>Kigali</item>
         <item>New York</item>
+        <item>Current Location</item>
     </string-array>
 
 

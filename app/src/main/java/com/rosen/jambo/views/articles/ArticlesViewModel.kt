@@ -19,8 +19,6 @@ class ArticlesViewModel(application: Application?) : ViewModel() {
     }
 
     private val repository: NewsRepositoryImpl = NewsRepositoryImpl(mApplication)
-    private var articles: List<Articles> = listOf()
-
 
     fun getAllNewsArticles(location : String, apiKey : String): Observable<MutableList<Article>>? {
         return repository.getNewsArticlesForLocation(location, apiKey)
