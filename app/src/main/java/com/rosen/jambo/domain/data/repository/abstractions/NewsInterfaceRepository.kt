@@ -11,8 +11,6 @@ import io.reactivex.Observable
  */
 interface NewsInterfaceRepository {
 
-    fun getArticleList(): List<Article>
-
     fun getNewsArticlesForLocation(location: String, apiKey: String): Observable<Articles>
 
     fun getNewsArticlesForLocationOffline(location: String): List<Article>

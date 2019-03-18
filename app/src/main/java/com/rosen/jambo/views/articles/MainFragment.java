@@ -67,6 +67,8 @@ public class MainFragment extends Fragment {
     FragmentModel fragmentModel;
     FragmentMainBinding binding;
 
+    public MainFragment(){}
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,7 +100,7 @@ public class MainFragment extends Fragment {
 
         articlesAdapter = new ArticlesAdapter(requireActivity(), articleList);
         articlesRecyclerView.setAdapter(articlesAdapter);
-        articlesRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+        articlesRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
         checkNetworkConnection();
 

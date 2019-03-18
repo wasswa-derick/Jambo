@@ -9,9 +9,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -34,7 +32,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -63,7 +60,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static android.content.Context.LOCATION_SERVICE;
 
 
 /**
@@ -71,7 +67,7 @@ import static android.content.Context.LOCATION_SERVICE;
  * Github: @wasswa-derick
  * Andela (Kampala, Uganda)
  */
-public class CurrentLocationFragment extends Fragment implements LocationListener, OnMapReadyCallback,
+public class CurrentLocationFragment extends Fragment implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener {
 
     Button btnProceed;
@@ -91,7 +87,6 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
     ArticlesViewModel articlesViewModel;
 
     private static GoogleMap mMap;
-    public static Location mLastLocation;
     Marker assetMarker;
     double latitude;
     double longitude;
@@ -114,9 +109,6 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
 
 
         articlesViewModel = ViewModelProviders.of(this, new ArticleViewModelFactory(requireActivity().getApplication())).get(ArticlesViewModel.class);
-
-        staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        linearLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false);
     }
 
     @Override
@@ -142,19 +134,24 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
+        staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        linearLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false);
         initialiseArticleList(view);
 
         rlPick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (mLastLocation != null) {
+                if (MainActivity.lat != 0.0) {
 
-                    Location myLocation = mMap.getMyLocation();
-                    latitude = myLocation.getLatitude();
-                    longitude = myLocation.getLongitude();
-                    getAddress();
-                    setMarker(myLocation);
+                    latitude = MainActivity.lat;
+                    longitude = MainActivity.lon;
+                    Location location = new Location("");
+                    location.setLatitude(latitude);
+                    location.setLongitude(longitude);
+                    String address = MainActivity.locationHelper.getAddress(latitude, longitude).getAddressLine(0);
+                    setMarker(location, address != null ? address : "Your are here");
+                    getAddress(location);
 
                 } else {
 
@@ -317,11 +314,11 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
-    public void getAddress()
+    public void getAddress(Location location)
     {
         Address locationAddress;
 
-        locationAddress = MainActivity.locationHelper.getAddress(latitude,longitude);
+        locationAddress = MainActivity.locationHelper.getAddress(location.getLatitude(), location.getLongitude());
 
         if(locationAddress!=null)
         {
@@ -412,25 +409,9 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
         }
 
         mMap.setMyLocationEnabled(true);
-        LocationManager locationManager = (LocationManager) requireActivity().getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        String bestProvider = locationManager.getBestProvider(criteria, true);
-        Location location = locationManager.getLastKnownLocation(bestProvider);
-        mLastLocation = location;
-        if (location != null) {
-            onLocationChanged(location);
-        }
-
     }
 
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-        setMarker(location);
-    }
-
-    public void setMarker(Location location){
+    public void setMarker(Location location, String address){
         double latitudeVal = location.getLatitude();
         double longitudeVal = location.getLongitude();
         LatLng latLng = new LatLng(latitudeVal, longitudeVal);
@@ -439,7 +420,7 @@ public class CurrentLocationFragment extends Fragment implements LocationListene
             assetMarker.remove();
         }
 
-        assetMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+        assetMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(address).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
         assetMarker.showInfoWindow();
 

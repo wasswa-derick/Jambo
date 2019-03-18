@@ -19,8 +19,6 @@ class ArticlesViewModel(application: Application?) : ViewModel() {
     }
 
     private val repository: NewsRepositoryImpl = NewsRepositoryImpl(mApplication)
-    private var articles: List<Articles> = listOf()
-
 
     fun getAllNewsArticles(location : String, apiKey : String): Observable<MutableList<Article>>? {
         return repository.getNewsArticlesForLocation(location, apiKey)
@@ -36,14 +34,5 @@ class ArticlesViewModel(application: Application?) : ViewModel() {
     fun saveTagArticles(articles : List<Article>, articleTag: String) {
         repository.saveUsers(articles, articleTag)
     }
-
-    fun deleteTagArticles(articleTag: String) {
-        repository.deleteTagArticles(articleTag)
-    }
-
-    fun getArticleList(): Observable<List<Article>> {
-        return Observable.just(repository.getArticleList())
-    }
-
 
 }

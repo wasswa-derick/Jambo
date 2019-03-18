@@ -1,43 +1,28 @@
 package com.rosen.jambo.views.articles;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.location.aravind.getlocation.GeoLocator;
 import com.rosen.jambo.R;
 import com.rosen.jambo.utils.NetworkConnectionDetector;
 import com.rosen.jambo.views.currentlocation.CurrentLocationFragment;
 import com.rosen.jambo.views.currentlocation.LocationHelper;
+
+import org.ankit.gpslibrary.ADLocation;
+import org.ankit.gpslibrary.MyTracker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,8 +30,7 @@ import nl.psdcompany.duonavigationdrawer.views.DuoDrawerLayout;
 import nl.psdcompany.duonavigationdrawer.views.DuoMenuView;
 import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
 
-public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener, GoogleApiClient.ConnectionCallbacks,
-        LocationListener, GoogleApiClient.OnConnectionFailedListener,ActivityCompat.OnRequestPermissionsResultCallback {
+public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener, MyTracker.ADLocationListener {
 
     protected GoogleApiClient mGoogleApiClient;
 
@@ -56,19 +40,19 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     private ArrayList<String> mTitles = new ArrayList<>();
 
     String NEWS_API_KEY = System.getenv("NEWS_API_KEY");
-    String TAG = "MAIN ACTIVITY";
 
 
     public static LocationHelper locationHelper;
-    private LocationRequest locationRequest;
     public static int PERMISSION_LOCATION_REQUEST_CODE = 1;
-    public static Location lastLocation;
-
-    private static final int UPDATE_INTERVAL = 120000;
-    private static final int FASTEST_INTERVAL = 100000;
 
     //  Broadcast event for internet connectivity
     BroadcastReceiver networkStateReceiver;
+
+    public static double lat = 0.0;
+    public static double lon = 0.0;
+    public static GeoLocator geoLocator;
+    public static ADLocation locator;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,19 +78,32 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         // check availability of play services
         if (locationHelper.checkPlayServices()) {
             // Building the GoogleApi client
-            buildGoogleApiClient();
-            locationChecker(mGoogleApiClient, MainActivity.this);
+            locationHelper.checkPermission();
         }
 
         // Show main fragment in container
-        goToFragment(new CurrentLocationFragment(), false);
+        goToFragment(new MainFragment(), false);
         mMenuAdapter.setViewSelected(0, true);
         setTitle(mTitles.get(0));
 
         mViewHolder.mDuoMenuView.setFooterView(R.layout.footer);
         mViewHolder.mDuoMenuView.setHeaderView(R.layout.header);
 
+        findLoc();
+
         checkNetworkConnection();
+    }
+
+    private void findLoc(){
+        new MyTracker(getApplicationContext(),this).track();
+    }
+
+    public static void setCurrentLocationLatitude(double latitude) {
+        lat = latitude;
+    }
+
+    public static void setCurrentLocationLongitude(double longitude) {
+        lon = longitude;
     }
 
     private void checkNetworkConnection() {
@@ -168,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
     }
 
-    private void goToFragment(Fragment fragment, boolean addToBackStack) {
+    public void goToFragment(Fragment fragment, boolean addToBackStack) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         if (addToBackStack) {
@@ -189,30 +186,30 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         // Navigate to the right fragment
         switch (position) {
             case 0:
-                goToFragment(new CurrentLocationFragment(), true);
-                break;
-            case 1:
                 //Load articles for Kampala
                 goToFragment(new MainFragment(), true);
                 break;
-            case 2:
+            case 1:
                 //load articles for Nairobi
                 goToFragment(new MainFragment(), true);
                 break;
-            case 3:
+            case 2:
                 //Load articles for Lagos
                 goToFragment(new MainFragment(), true);
                 break;
-            case 4:
+            case 3:
                 //Load articles for Kigali
                 goToFragment(new MainFragment(), true);
                 break;
-            case 5:
+            case 4:
                 //Load articles for New York
                 goToFragment(new MainFragment(), true);
                 break;
+            case 5:
+                goToFragment(new CurrentLocationFragment(), true);
+                break;
             default:
-                goToFragment(new CurrentLocationFragment(), false);
+                goToFragment(new MainFragment(), false);
                 setTitle(0);
                 break;
         }
@@ -222,8 +219,10 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-
+    public void whereIAM(ADLocation geoLocator) {
+        locator = geoLocator;
+        setCurrentLocationLatitude(geoLocator.lat);
+        setCurrentLocationLongitude(geoLocator.longi);
     }
 
 
@@ -261,165 +260,15 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         super.onPause();
     }
 
-    /**
-     * Google api callback methods
-     */
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        Log.i("Connection failed:", " ConnectionResult.getErrorCode() = "
-                + result.getErrorCode());
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnected(Bundle arg0) {
-        // Once connected with google api, get the location
-    }
-
-    @Override
-    public void onConnectionSuspended(int arg0) {
-        locationHelper.connectApiClient();
-    }
-
-
-    // Permission check functions
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult()");
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case 1: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission granted
-                    getLastKnownLocation();
-
-                } else {
-                    Log.w(TAG, "permissionsDenied()");
-                }
-                break;
-            }
-        }
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .enableAutoManage(this, 34902, this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-    }
-
-    /**
-     * Prompt user to enable GPS and Location Services
-     * @param mGoogleApiClient
-     * @param activity
-     */
-    public static void locationChecker(GoogleApiClient mGoogleApiClient, final Activity activity) {
-        Log.d("Location Checker", " Calling location checker");
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(10 * 1000);
-        locationRequest.setFastestInterval(5 * 1000);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
-        builder.setAlwaysShow(true);
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(LocationSettingsResult result) {
-                final Status status = result.getStatus();
-                final LocationSettingsStates state = result.getLocationSettingsStates();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can initialize location
-                        // requests here.
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        // Location settings are not satisfied. But could be fixed by showing the user
-                        // a dialog.
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(activity, 1000);
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way to fix the
-                        // settings so we won't show the dialog.
-                        break;
-                }
-            }
-        });
-    }
-
-    // Get last known location
-    private void getLastKnownLocation() {
-        Log.d(TAG, "getLastKnownLocation()");
-        if (checkPermission()) {
-            lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (lastLocation != null) {
-                Log.i(TAG, "LasKnown location. " +
-                        "Long: " + lastLocation.getLongitude() +
-                        " | Lat: " + lastLocation.getLatitude());
-                startLocationUpdates();
-            } else {
-                Log.w(TAG, "No location retrieved yet");
-                startLocationUpdates();
-            }
-        } else askPermission();
-    }
-
-    // Start location Updates
-    public void startLocationUpdates() {
-        Log.i(TAG, "startLocationUpdates()");
-        locationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(UPDATE_INTERVAL)
-                .setFastestInterval(FASTEST_INTERVAL);
-
-        if (checkPermission())
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, (com.google.android.gms.location.LocationListener) this);
-    }
-
-    // Check for permission to access Location
-    private boolean checkPermission() {
-        Log.d(TAG, "checkPermission()");
-        // Ask for permission if it wasn't granted yet
-        return (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED);
-    }
-
-    // Asks for permission
-    private void askPermission() {
-        Log.d(TAG, "askPermission()");
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                1
-        );
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
-        if (!mGoogleApiClient.isConnecting() || !mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.connect();
-        }
     }
 
     @Override
     protected void onStop() {
+
         super.onStop();
-        if (mGoogleApiClient.isConnecting() || mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
 
     }
 

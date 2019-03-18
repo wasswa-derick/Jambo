@@ -22,7 +22,6 @@ import java.util.concurrent.Future
 class NewsRepositoryImpl(application: Application?) : NewsInterfaceRepository {
 
     private var articleDao: ArticleDao
-    private var articlesBy: List<Article>? = null
 
     init {
         val db = ArticleDatabase.getDatabase(application)
@@ -30,9 +29,6 @@ class NewsRepositoryImpl(application: Application?) : NewsInterfaceRepository {
     }
 
     private var apiService = RetrofitModule().getNewsArticlesService()
-    internal var articles: MutableList<Article> = ArrayList()
-
-    override fun getArticleList(): List<Article> = articles
 
     override fun getNewsArticlesForLocation(location: String, apiKey: String): Observable<Articles> = apiService.getNewsArticles(location, apiKey)
 

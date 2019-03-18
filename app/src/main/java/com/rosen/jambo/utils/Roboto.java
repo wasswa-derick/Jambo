@@ -15,15 +15,6 @@ public class Roboto {
         this.context = context;
     }
 
-    // the custom roboto fonts
-    public Typeface getRegularRoboto(){
-        return Typeface.createFromAsset(context.getAssets(), "fonts/RobotoRegular.ttf");
-    }
-
-    public Typeface getBoldRoboto(){
-        return Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Bold.ttf");
-    }
-
     public Typeface getLightRoboto(){
         return Typeface.createFromAsset(context.getAssets(), "fonts/RobotoCondensedLight.ttf");
     }
@@ -34,9 +25,7 @@ public class Roboto {
     public Typeface getLobster(){
         return Typeface.createFromAsset(context.getAssets(), "fonts/LobsterTwoRegular.otf");
     }
-    public Typeface getKaushan(){
-        return Typeface.createFromAsset(context.getAssets(), "fonts/KaushanScriptRegular.otf");
-    }
+
     public Typeface getDancing(){
         return Typeface.createFromAsset(context.getAssets(), "fonts/DancingScriptRegular.otf");
     }
@@ -44,20 +33,8 @@ public class Roboto {
         return Typeface.createFromAsset(context.getAssets(), "fonts/GoodDog.otf");
     }
 
-    public Typeface getColabReg(){
-        return Typeface.createFromAsset(context.getAssets(), "fonts/ColabReg.otf");
-    }
-
-    public Typeface getExoRegular(){
-        return Typeface.createFromAsset(context.getAssets(), "fonts/ExoRegular.otf");
-    }
-
     public Typeface getStencilLight(){
         return Typeface.createFromAsset(context.getAssets(), "fonts/StencilLight.otf");
-    }
-
-    public Typeface getTillium(){
-        return Typeface.createFromAsset(context.getAssets(), "fonts/Titillium.otf");
     }
 
     public Typeface getWalkWay(){
