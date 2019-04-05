@@ -6,6 +6,7 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
 import com.rosen.jambo.views.articles.Article;
+import com.rosen.jambo.views.articles.Bookmark;
 
 import java.util.List;
 
@@ -25,5 +26,11 @@ public interface ArticleDao {
 
     @Query("DELETE FROM article WHERE id = :articleTag")
     public void deleteArticleBy(String articleTag);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertBookmark(Bookmark bookmark);
+
+    @Query("SELECT * from bookmarks")
+    List<Bookmark> getBookmarks();
 
 }

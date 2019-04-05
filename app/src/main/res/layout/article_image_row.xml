@@ -4,7 +4,7 @@
 
     <data>
         <variable
-            name="article"
+            name="news_article"
             type="com.rosen.jambo.views.articles.Article" />
     </data>
 
@@ -12,7 +12,7 @@
         android:clickable="true"
         android:focusable="true"
         android:id="@+id/root"
-        app:cardPref="@{article.title}"
+        app:cardPref="@{news_article.title}"
         android:layout_margin="4dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
                 android:layout_height="200dp"
                 android:maxHeight="300dp"
                 android:id="@+id/articleImage"
-                app:imageUrl="@{article.urlToImage}"
+                app:imageUrl="@{news_article.urlToImage}"
                 android:background="@color/dividerColor"
                 android:scaleType="centerCrop" />
 
@@ -37,13 +37,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/article"
-                app:textPref="@{article.title}"
+                app:textPref="@{news_article.title}"
                 android:typeface="sans"
                 android:padding="10dp"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginTop="4dp"
-                android:text="@{article.title}" />
+                android:text="@{news_article.title}" />
 
 
 
@@ -65,14 +65,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:textStyle="bold"
-                        android:text="@{article.author}" />
+                        android:text="@{news_article.author}" />
 
 
                     <TextView
                         android:id="@+id/timestamp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{article.publishedAt}"
+                        android:text="@{news_article.publishedAt}"
                         android:layout_marginBottom="8dp" />
 
                 </LinearLayout>

@@ -6,13 +6,14 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 import com.rosen.jambo.views.articles.Article;
+import com.rosen.jambo.views.articles.Bookmark;
 
 /**
  * Created by Derick W on 16,March,2019
  * Github: @wasswa-derick
  * Andela (Kampala, Uganda)
  */
-@Database(entities = Article.class, version = 1, exportSchema = false)
+@Database(entities = {Article.class, Bookmark.class}, version = 1, exportSchema = false)
 public abstract class ArticleDatabase extends RoomDatabase {
 
     public abstract ArticleDao articleDao();
