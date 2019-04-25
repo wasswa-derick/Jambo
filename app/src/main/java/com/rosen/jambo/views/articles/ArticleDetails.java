@@ -1,5 +1,6 @@
 package com.rosen.jambo.views.articles;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import com.rosen.jambo.R;
 import com.rosen.jambo.databinding.ArticleDetailsBinding;
+import com.rosen.jambo.views.bookmarks.Bookmark;
 
 /**
  * Created by Derick W on 14,March,2019
@@ -25,12 +27,14 @@ public class ArticleDetails extends AppCompatActivity {
     Article article;
     String title, content, description, author, timestamp, url, image;
     ArticleDetailsBinding binding;
+    ArticlesViewModel articlesViewModel;
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.article_details);
+        articlesViewModel = ViewModelProviders.of(this, new ArticleViewModelFactory(getApplication())).get(ArticlesViewModel.class);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,6 +100,13 @@ public class ArticleDetails extends AppCompatActivity {
             copyToClipboard(getApplicationContext(), data);
             Toast.makeText(this, "Copied", Toast.LENGTH_LONG).show();
             return true;
+        }
+
+        if (id == R.id.action_bookmark_article) {
+            Bookmark bookmark = new Bookmark();
+            bookmark.setArticleID(title);
+            articlesViewModel.bookArticles(bookmark);
+            Toast.makeText(this, "Article bookmarked.", Toast.LENGTH_LONG).show();
         }
 
         if (id == android.R.id.home) {

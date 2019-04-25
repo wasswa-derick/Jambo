@@ -1,4 +1,4 @@
-package com.rosen.jambo.views.articles;
+package com.rosen.jambo.domain.databinding;
 
 import android.databinding.BindingAdapter;
 import android.widget.ImageView;
@@ -11,7 +11,7 @@ import com.squareup.picasso.Picasso;
  * Github: @wasswa-derick
  * Andela (Kampala, Uganda)
  */
-public class ImageBindingAdapter {
+public class BindingAdapters {
 
     @BindingAdapter({"bind:imageUrl"})
     public static void setImageUrl(ImageView imageView, String url) {

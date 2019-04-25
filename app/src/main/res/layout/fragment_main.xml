@@ -3,9 +3,12 @@
     tools:context=".views.articles.ArticleDetails">
 
     <data>
+
+        <import type="com.rosen.jambo.views.articles.ArticlesViewModel" />
+
         <variable
-            name="fragment_model"
-            type="com.rosen.jambo.views.articles.FragmentModel" />
+            name="viewModel"
+            type="ArticlesViewModel" />
 
     </data>
 
@@ -18,7 +21,7 @@
 
 
         <TextView
-            android:visibility="@{!fragment_model.emptyList}"
+            android:visibility="@{!viewModel.articleListIsEmpty}"
             android:id="@+id/no_jambos"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,7 +43,7 @@
             android:max="100"
             android:padding="@dimen/activity_horizontal_margin"
             android:layout_marginTop="7dp"
-            android:visibility="@{!fragment_model.loadingArticles}"
+            android:visibility="@{!viewModel.articlesLoading}"
             android:layout_height="wrap_content" />
 
 

@@ -4,6 +4,7 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.databinding.ObservableBoolean;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -63,6 +64,9 @@ public class Article implements Parcelable {
     @SerializedName("source")
     @Expose
     private Source source;
+
+    @Ignore
+    ObservableBoolean selected = new ObservableBoolean(false);
 
     @Ignore
     public Article(){}
@@ -183,6 +187,14 @@ public class Article implements Parcelable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public ObservableBoolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(ObservableBoolean selected) {
+        this.selected = selected;
     }
 
     public static Creator<Article> getCREATOR() {

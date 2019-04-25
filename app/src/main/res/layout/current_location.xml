@@ -5,9 +5,12 @@
     tools:context=".views.articles.ArticleDetails">
 
     <data>
+
+        <import type="com.rosen.jambo.views.articles.ArticlesViewModel" />
+
         <variable
-            name="fragment_model"
-            type="com.rosen.jambo.views.articles.FragmentModel" />
+            name="viewModel"
+            type="ArticlesViewModel" />
 
     </data>
 
@@ -159,7 +162,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="36dp"
                 android:textStyle="bold"
-                android:visibility="@{!fragment_model.emptyList}"
+                android:visibility="@{!viewModel.articleListIsEmpty}"
                 android:textSize="22sp"
                 android:text="@string/no_items"
                 android:textColor="@color/secondaryTextColor" />
@@ -174,7 +177,7 @@
                 android:max="100"
                 android:padding="@dimen/activity_horizontal_margin"
                 android:layout_marginTop="7dp"
-                android:visibility="@{!fragment_model.loadingArticles}"
+                android:visibility="@{!viewModel.articlesLoading}"
                 android:layout_height="wrap_content" />
 
 

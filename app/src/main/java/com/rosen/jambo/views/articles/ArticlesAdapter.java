@@ -4,12 +4,14 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.rosen.jambo.R;
 import com.rosen.jambo.databinding.ArticleImageRowBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,13 +22,15 @@ import java.util.List;
 public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.ArticleHolder> {
 
     public Context context;
-    public List<Article> articleList;
-    public LayoutInflater layoutInflater;
+    private List<Article> articleList;
+    private LayoutInflater layoutInflater;
+    private SparseBooleanArray selectedItems;
 
     public ArticlesAdapter(Context context, List<Article> articleList) {
         this.context = context;
         this.articleList = articleList;
         this.layoutInflater = LayoutInflater.from(context);
+        this.selectedItems = new SparseBooleanArray();
     }
 
     @NonNull
@@ -38,9 +42,16 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ArticleHolder articleHolder, int i) {
-        Article article = articleList.get(i);
+    public void onBindViewHolder(@NonNull ArticleHolder articleHolder, int position) {
+        Article article = articleList.get(position);
+        article.selected.set(getSelectedItems().contains(position));
         articleHolder.bind(article);
+        articleHolder.itemView.setActivated(getSelectedItems().contains(position));
+    }
+
+    public void updateArticles(List<Article> articles) {
+        this.articleList = articles;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -51,7 +62,7 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
     public class ArticleHolder extends RecyclerView.ViewHolder {
         private final ArticleImageRowBinding binding;
 
-        public ArticleHolder(@NonNull ArticleImageRowBinding articleImageRowBinding) {
+        ArticleHolder(@NonNull ArticleImageRowBinding articleImageRowBinding) {
             super(articleImageRowBinding.getRoot());
             this.binding = articleImageRowBinding;
         }
@@ -60,6 +71,48 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
             binding.setArticle(article);
             binding.executePendingBindings();
         }
+    }
+
+    void toggleSelection(int pos) {
+        // monitor the changes of the item states either is selected or is deselected
+        if (selectedItems.get(pos, false)) {
+            selectedItems.delete(pos);
+        }
+        else {
+            selectedItems.put(pos, true);
+        }
+        notifyItemChanged(pos);
+    }
+
+    void toggleSelectionAll(Boolean isSelected) {
+        for (int position = 0; position < articleList.size(); position++) {
+            if (isSelected) {
+                selectedItems.put(position, true);
+            } else {
+                selectedItems.delete(position);
+            }
+
+            notifyItemChanged(position);
+        }
+    }
+
+    void clearSelections() {
+        //clear a selected item
+        selectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    //get the number of items selected
+    int getSelectedItemCount() {
+        return selectedItems.size();
+    }
+
+    public List<Integer> getSelectedItems() {
+        List<Integer> items = new ArrayList<Integer>(selectedItems.size());
+        for (int i = 0; i < selectedItems.size(); i++) {
+            items.add(selectedItems.keyAt(i));
+        }
+        return items;
     }
 
 }

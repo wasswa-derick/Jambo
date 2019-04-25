@@ -12,5 +12,6 @@
 
     <color name="proceed_disable">#DEDEDE</color>
     <color name="proceed_enable">#FF5722</color>
+    <color name="transparent">#00ffffff</color>
 
 </resources>
