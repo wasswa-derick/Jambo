@@ -24,6 +24,12 @@
     <string name="quilt">Quilt</string>
     <string name="textstyle">Text style</string>
     <string name="textsize">Font size</string>
+    <string name="no_bookmarks">No article has been bookmarked</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="remove">Remove Bookmark</string>
+    <string name="select_all">Select All</string>
+    <string name="selected_count">%1$s selected</string>
 
     <string name="mores">More</string>
     <string name="share">Share</string>

@@ -1,12 +1,7 @@
-package com.rosen.jambo.views.articles;
+package com.rosen.jambo.views.bookmarks;
 
-
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.graphics.Typeface;
@@ -14,41 +9,39 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
-import android.view.HapticFeedbackConstants;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import com.rosen.jambo.R;
+import com.rosen.jambo.databinding.BookmarksBinding;
 import com.rosen.jambo.databinding.FragmentMainBinding;
-import com.rosen.jambo.utils.NetworkConnectionDetector;
-import com.rosen.jambo.views.bookmarks.Bookmark;
-import com.rosen.jambo.views.bookmarks.BookmarksActivity;
+import com.rosen.jambo.views.articles.Article;
+import com.rosen.jambo.views.articles.ArticleDetails;
+import com.rosen.jambo.views.articles.ArticleListClick;
+import com.rosen.jambo.views.articles.ArticleViewModelFactory;
+import com.rosen.jambo.views.articles.ArticlesAdapter;
+import com.rosen.jambo.views.articles.ArticlesViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-
-
-public class MainFragment extends Fragment{
+/**
+ * Created by Derick W on 26,April,2019
+ * Github: @wasswa-derick
+ * Andela (Kampala, Uganda)
+ */
+public class BookmarksActivity extends AppCompatActivity {
 
     RecyclerView articlesRecyclerView;
 
@@ -57,129 +50,75 @@ public class MainFragment extends Fragment{
 
     ArticlesAdapter articlesAdapter;
     List<Article> articleList = new ArrayList<>();
+    List<Bookmark> bookmarkList = new ArrayList<>();
     ArticlesViewModel articlesViewModel;
 
     //Font Style Preferences
     private SharedPreferences.OnSharedPreferenceChangeListener prefListener;
     SharedPreferences prefs;
 
-    //  Broadcast event for internet connectivity
-    BroadcastReceiver networkStateReceiver;
-
-    FragmentMainBinding binding;
-    private ActionMode actionMode = null;
-    ActionModeCallback actionModeCallback = new ActionModeCallback();
-
-    public MainFragment(){}
+    BookmarksBinding binding;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-        articlesViewModel = ViewModelProviders.of(this, new ArticleViewModelFactory(requireActivity().getApplication())).get(ArticlesViewModel.class);
+        binding = DataBindingUtil.setContentView(this, R.layout.bookmarks);
+        View view = binding.getRoot();
+
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setTitle(getApplicationContext().getString(R.string.bookmarks));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        articlesViewModel = ViewModelProviders.of(this, new ArticleViewModelFactory(getApplication())).get(ArticlesViewModel.class);
+        fetchBookmarks();
 
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-        linearLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false);
+        linearLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
         //listener on changed sort text preference:
-        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         prefs.registerOnSharedPreferenceChangeListener(prefListener);
-    }
-
-    @SuppressLint("CheckResult")
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main, container, false);
-        View view = binding.getRoot();
 
         binding.setViewModel(articlesViewModel);
 
+
         articlesRecyclerView = view.findViewById(R.id.articles_list);
-        articlesAdapter = new ArticlesAdapter(requireActivity(), articleList);
+        articlesAdapter = new ArticlesAdapter(getApplicationContext(), articleList);
         articlesRecyclerView.setAdapter(articlesAdapter);
         articlesRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
-        checkNetworkConnection();
-
         getArticleDetails();
+        getBookmarkArticles();
 
-        return view;
     }
 
-    public void getOfflineArticles(String articleTag){
+    public void fetchBookmarks() {
+        if (!bookmarkList.isEmpty()) {
+            bookmarkList.clear();
+        }
+        bookmarkList.addAll(articlesViewModel.getAllBookmarks());
+    }
+
+    public void getBookmarkArticles(){
+
         if (!articleList.isEmpty()) {
             articleList.clear();
         }
-        articleList.addAll(articlesViewModel.getOfflineArticlesByTag(articleTag));
+
+        for (Bookmark bookmark: bookmarkList) {
+            articleList.add(articlesViewModel.getArticleByID(bookmark.getArticleID()));
+        }
+
         articlesAdapter.notifyDataSetChanged();
     }
 
-    private void checkNetworkConnection() {
-        // Network Utility
-        networkStateReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Boolean connection = new NetworkConnectionDetector(requireActivity().getApplicationContext()).InternetConnectionStatus();
-                if (!connection) {
-                    if (articleList.isEmpty()) {
-                        Toast.makeText(context, "offline articles still here", Toast.LENGTH_SHORT).show();
-                        getOfflineArticles(requireActivity().getTitle().toString());
-                    }
-                } else {
-                    fetchAPIArticles();
-                }
-            }
-        };
-        requireActivity().registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-    }
-
-    private void fetchAPIArticles() {
-        articlesViewModel.getAllNewsArticles(requireActivity().getTitle().toString(), requireActivity().getResources().getString(R.string.news_api_key))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<List<Article>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(List<Article> articles) {
-                        if (!articleList.isEmpty()) {
-                            articleList.clear();
-                        }
-
-                        articleList.addAll(articles);
-                        articlesAdapter.notifyDataSetChanged();
-                        articlesViewModel.saveTagArticles(articles, requireActivity().getTitle().toString());
-                    }
-
-                    @SuppressLint("LogNotTimber")
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d("ERROR", e.getLocalizedMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        articlesAdapter.notifyDataSetChanged();
-                    }
-                });
-
-    }
-
     private void getArticleDetails() {
-        articlesRecyclerView.addOnItemTouchListener(new ArticleListClick(requireActivity(), new ArticleListClick.OnItemClickListener() {
+        articlesRecyclerView.addOnItemTouchListener(new ArticleListClick(getApplicationContext(), new ArticleListClick.OnItemClickListener() {
             @Override
             public void onItemClick(View childView, int position) {
 
-                if (actionMode != null) {
-                    childView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    toggleArticleSelection(position);
-                } else {
-                    Intent intent = new Intent(requireActivity(), ArticleDetails.class);
+                    Intent intent = new Intent(getApplicationContext(), ArticleDetails.class);
                     Bundle bundle = new Bundle();
 
                     Article article = articleList.get(position);
@@ -192,25 +131,13 @@ public class MainFragment extends Fragment{
                     bundle.putString("image", article.getUrlToImage());
                     intent.putExtra("data", bundle);
                     startActivity(intent);
-                }
+
             }
 
             @Override
             public void onItemLongPress(View childView, int position) {
-                if (actionMode == null) {
-                    actionMode = ((AppCompatActivity) requireActivity()).startSupportActionMode(actionModeCallback);
-                }
-
-                childView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                toggleArticleSelection(position);
             }
         }));
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main, menu);
-        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -224,25 +151,31 @@ public class MainFragment extends Fragment{
             showTextSize();
         } else if (id == R.id.action_text_style) {
             showTextStyle();
-        } else if (id == R.id.action_bookmarks) {
-            startActivity(new Intent(requireActivity(), BookmarksActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        MenuItem bookmarkMenu = menu.findItem(R.id.action_bookmarks);
+        bookmarkMenu.setVisible(false);
+        return true;
+    }
+
     // show the dialog text style
     public void showTextStyle() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppCompatAlertDialogStyle);
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(BookmarksActivity.this, R.style.AppCompatAlertDialogStyle);
+        LayoutInflater inflater = LayoutInflater.from(BookmarksActivity.this);
         View dl = inflater.inflate(R.layout.text_style, null);
 
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/RobotoRegular.ttf");
-        Typeface typeface1 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/LobsterTwoRegular.otf");
-        Typeface typeface2 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/journal.ttf");
-        Typeface typeface3 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Walkway.ttf");
-        Typeface typeface5 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/GoodDog.otf");
-        Typeface typeface4 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/DancingScriptRegular.otf");
+        Typeface typeface = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/RobotoRegular.ttf");
+        Typeface typeface1 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/LobsterTwoRegular.otf");
+        Typeface typeface2 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/journal.ttf");
+        Typeface typeface3 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/Walkway.ttf");
+        Typeface typeface5 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/GoodDog.otf");
+        Typeface typeface4 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/DancingScriptRegular.otf");
 
         RadioButton roboto = dl.findViewById(R.id.roboto);
         roboto.setTypeface(typeface);
@@ -323,8 +256,8 @@ public class MainFragment extends Fragment{
     }
 
     public void showTextSize() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppCompatAlertDialogStyle);
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(BookmarksActivity.this, R.style.AppCompatAlertDialogStyle);
+        LayoutInflater inflater = LayoutInflater.from(BookmarksActivity.this);
         View dl = inflater.inflate(R.layout.text_sizes, null);
 
         RadioButton normal = dl.findViewById(R.id.normal);
@@ -383,84 +316,12 @@ public class MainFragment extends Fragment{
             }
         });
 
-        builder.setTitle("Choose text syle.");
+        builder.setTitle("Choose text style.");
         builder.setView(dl);
-
-
-
 
         final AlertDialog customAlertDialog = builder.create();
         customAlertDialog.show();
 
 
     }
-
-    private void updateActionModeTitle() {
-        if (actionMode != null) {
-            if (articlesAdapter.getSelectedItemCount() == 0) {
-                actionMode.finish();
-            } else {
-                String title = getString(R.string.selected_count, articlesAdapter.getSelectedItemCount() + "");
-                actionMode.setTitle(title);
-                actionMode.invalidate();
-            }
-        }
-    }
-
-    private void toggleArticleSelection(int idx) {
-        articlesAdapter.toggleSelection(idx);
-        updateActionModeTitle();
-    }
-
-    public void bookmarkArticles() {
-        for (int i = 0; i <articleList.size(); i++) {
-            if (articlesAdapter.getSelectedItems().contains(i)) {
-                Bookmark bookmark = new Bookmark();
-                bookmark.setArticleID(articleList.get(i).getTitle());
-                articlesViewModel.bookArticles(bookmark);
-            }
-        }
-        actionMode.finish();
-        Toast.makeText(requireActivity(), "Article(s) bookmarked.", Toast.LENGTH_LONG).show();
-    }
-
-    private class ActionModeCallback implements ActionMode.Callback {
-
-        @SuppressWarnings("unused")
-        private final String TAG = ActionModeCallback.class.getSimpleName();
-
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.getMenuInflater().inflate (R.menu.bookmark_articles, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.action_bookmark_article:
-                    bookmarkArticles();
-                    return true;
-                case R.id.action_select_all:
-                    item.setChecked(!item.isChecked());
-                    articlesAdapter.toggleSelectionAll(item.isChecked());
-                    updateActionModeTitle();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            actionMode = null;
-            articlesAdapter.clearSelections();
-        }
-    }
-
 }

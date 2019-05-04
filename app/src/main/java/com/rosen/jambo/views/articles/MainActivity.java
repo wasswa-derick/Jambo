@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
     public static double lat = 0.0;
     public static double lon = 0.0;
-    public static GeoLocator geoLocator;
     public static ADLocation locator;
 
 
@@ -82,9 +81,9 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         }
 
         // Show main fragment in container
-        goToFragment(new MainFragment(), false);
         mMenuAdapter.setViewSelected(0, true);
         setTitle(mTitles.get(0));
+        goToFragment(new MainFragment(), false);
 
         mViewHolder.mDuoMenuView.setFooterView(R.layout.footer);
         mViewHolder.mDuoMenuView.setHeaderView(R.layout.header);
@@ -187,26 +186,26 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         switch (position) {
             case 0:
                 //Load articles for Kampala
-                goToFragment(new MainFragment(), true);
+                goToFragment(new MainFragment(), false);
                 break;
             case 1:
                 //load articles for Nairobi
-                goToFragment(new MainFragment(), true);
+                goToFragment(new MainFragment(), false);
                 break;
             case 2:
                 //Load articles for Lagos
-                goToFragment(new MainFragment(), true);
+                goToFragment(new MainFragment(), false);
                 break;
             case 3:
                 //Load articles for Kigali
-                goToFragment(new MainFragment(), true);
+                goToFragment(new MainFragment(), false);
                 break;
             case 4:
                 //Load articles for New York
-                goToFragment(new MainFragment(), true);
+                goToFragment(new MainFragment(), false);
                 break;
             case 5:
-                goToFragment(new CurrentLocationFragment(), true);
+                goToFragment(new CurrentLocationFragment(), false);
                 break;
             default:
                 goToFragment(new MainFragment(), false);
@@ -256,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
     @Override
     protected void onPause() {
         // disconnect expensive broadcast receiver
-        unregisterReceiver(networkStateReceiver);
+//        unregisterReceiver(networkStateReceiver);
         super.onPause();
     }
 
@@ -267,9 +266,14 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
 
     @Override
     protected void onStop() {
-
         super.onStop();
-
     }
 
+    @Override
+    protected void onDestroy() {
+        if (networkStateReceiver != null) {
+            unregisterReceiver(networkStateReceiver);
+        }
+        super.onDestroy();
+    }
 }

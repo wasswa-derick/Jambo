@@ -92,7 +92,6 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
     double longitude;
     String city;
 
-    FragmentModel fragmentModel;
 
     //  Broadcast event for internet connectivity
     BroadcastReceiver networkStateReceiver;
@@ -116,10 +115,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
         binding = DataBindingUtil.inflate(inflater, R.layout.current_location, container, false);
         View view = binding.getRoot();
 
-        fragmentModel = new FragmentModel();
-        fragmentModel.setLoadingArticles(true);
-        fragmentModel.setEmptyList(true);
-        binding.setFragmentModel(fragmentModel);
+        binding.setViewModel(articlesViewModel);
 
         btnProceed = view.findViewById(R.id.btnLocation);
         tvAddress = view.findViewById(R.id.tvAddress);
@@ -143,14 +139,14 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
             public void onClick(View view) {
 
                 if (MainActivity.lat != 0.0) {
-
+                    String address = "";
                     latitude = MainActivity.lat;
                     longitude = MainActivity.lon;
                     Location location = new Location("");
                     location.setLatitude(latitude);
                     location.setLongitude(longitude);
-                    String address = MainActivity.locationHelper.getAddress(latitude, longitude).getAddressLine(0);
-                    setMarker(location, address != null ? address : "Your are here");
+                    address = MainActivity.locationHelper.getAddress(latitude, longitude) != null ? MainActivity.locationHelper.getAddress(latitude, longitude).getAddressLine(0) : "You are here";
+                    setMarker(location, address);
                     getAddress(location);
 
                 } else {
@@ -174,7 +170,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
                     showToast("News articles for " + city);
                     requireActivity().setTitle(city);
 
-                    checkNetworkConnection(binding);
+                    checkNetworkConnection();
 
                 }
             }
@@ -184,20 +180,14 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
     }
 
     public void getOfflineArticles(String articleTag){
+        if (!articleList.isEmpty()) {
+            articleList.clear();
+        }
         articleList.addAll(articlesViewModel.getOfflineArticlesByTag(articleTag));
         articlesAdapter.notifyDataSetChanged();
-        fragmentModel.setLoadingArticles(false);
-
-        if (articleList.isEmpty()) {
-            fragmentModel.setEmptyList(true);
-        } else {
-            fragmentModel.setEmptyList(false);
-        }
-
-        binding.setFragmentModel(fragmentModel);
     }
 
-    private void checkNetworkConnection(CurrentLocationBinding binding) {
+    private void checkNetworkConnection() {
         // Network Utility
         networkStateReceiver = new BroadcastReceiver() {
             @Override
@@ -208,7 +198,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
                         getOfflineArticles(requireActivity().getTitle().toString());
                     }
                 } else {
-                    getArticlesForCurrentLocation(city, binding);
+                    getArticlesForCurrentLocation(city);
                 }
             }
         };
@@ -268,7 +258,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
         }));
     }
 
-    private void getArticlesForCurrentLocation (String currentLocation, CurrentLocationBinding binding) {
+    private void getArticlesForCurrentLocation (String currentLocation) {
         articlesViewModel.getAllNewsArticles(currentLocation, requireActivity().getResources().getString(R.string.news_api_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -282,8 +272,6 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
                     public void onNext(List<Article> articles) {
                         if (!articleList.isEmpty()) {
                             articleList.clear();
-                        } else {
-                            fragmentModel.setEmptyList(false);
                         }
 
                         articleList.addAll(articles);
@@ -298,13 +286,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
 
                     @Override
                     public void onComplete() {
-                        fragmentModel.setLoadingArticles(false);
-
-                        if (articleList.isEmpty()) {
-                            fragmentModel.setEmptyList(true);
-                        }
-
-                        binding.setFragmentModel(fragmentModel);
+                        articlesAdapter.notifyDataSetChanged();
                     }
                 });
     }

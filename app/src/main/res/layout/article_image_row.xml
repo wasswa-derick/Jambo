@@ -9,28 +9,45 @@
     </data>
 
     <android.support.v7.widget.CardView
-        android:clickable="true"
-        android:focusable="true"
         android:id="@+id/root"
         app:cardPref="@{article.title}"
+        android:clickable="true"
+        android:focusable="true"
+        android:longClickable="true"
         android:layout_margin="4dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/white">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:maxHeight="300dp"
-                android:id="@+id/articleImage"
-                app:imageUrl="@{article.urlToImage}"
-                android:background="@color/dividerColor"
-                android:scaleType="centerCrop" />
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:maxHeight="300dp"
+                    android:clickable="false"
+                    android:id="@+id/articleImage"
+                    app:imageUrl="@{article.urlToImage}"
+                    android:background="@color/dividerColor"
+                    android:scaleType="centerCrop" />
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:clickable="false"
+                    android:visibility="@{!article.selected}"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:id="@+id/articleSelected"
+                    android:src="@drawable/checked" />
+
+            </FrameLayout>
 
 
             <TextView
@@ -44,7 +61,6 @@
                 android:textStyle="bold"
                 android:layout_marginTop="4dp"
                 android:text="@{article.title}" />
-
 
 
             <RelativeLayout

@@ -2,6 +2,7 @@ package com.rosen.jambo.domain.data.repository.abstractions
 
 import com.rosen.jambo.views.articles.Article
 import com.rosen.jambo.views.articles.Articles
+import com.rosen.jambo.views.bookmarks.Bookmark
 import io.reactivex.Observable
 
 /**
@@ -15,8 +16,12 @@ interface NewsInterfaceRepository {
 
     fun getNewsArticlesForLocationOffline(location: String): List<Article>
 
-    fun saveUsers(articles: List<Article>, location: String)
+    fun saveArticles(articles: List<Article>, location: String)
 
-    fun deleteTagArticles(location: String)
+    fun bookmarkArticle(bookmark: Bookmark)
+
+    fun getBookmarks(): List<Bookmark>
+
+    fun getArticleByID(articleID : String) : Article
 
 }

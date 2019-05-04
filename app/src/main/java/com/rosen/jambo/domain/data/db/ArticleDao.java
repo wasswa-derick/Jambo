@@ -26,4 +26,7 @@ public interface ArticleDao {
     @Query("DELETE FROM article WHERE id = :articleTag")
     public void deleteArticleBy(String articleTag);
 
+    @Query("SELECT * from article WHERE title = :articleTitle")
+    Article getArticle(String articleTitle);
+
 }

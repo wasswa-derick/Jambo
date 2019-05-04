@@ -51,6 +51,11 @@
             android:parentActivityName=".views.articles.ArticleDetails"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <activity
+            android:name=".views.bookmarks.BookmarksActivity"
+            android:parentActivityName=".views.articles.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
     </application>
 
 </manifest>

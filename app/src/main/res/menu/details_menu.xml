@@ -9,5 +9,12 @@
         android:title="@string/copyContent"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_bookmark_article"
+        android:orderInCategory="101"
+        android:title="@string/bookmark"
+        android:icon="@drawable/bookmark"
+        app:showAsAction="ifRoom" />
+
 
 </menu>

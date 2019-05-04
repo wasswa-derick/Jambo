@@ -76,8 +76,6 @@ public class ArticleDetailsTest {
 //            fail("Should have thrown NoActivityResumedException");
         } catch (NoActivityResumedException expected) {
         }
-
-
     }
 
     @Test
@@ -111,6 +109,7 @@ public class ArticleDetailsTest {
         onView(withId(R.id.action_copy)).perform(click());
 
     }
+
 
     private void sleepThread(int seconds) {
         try {
