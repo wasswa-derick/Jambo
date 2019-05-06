@@ -131,6 +131,7 @@ dependencies {
         exclude  group:'com.google.android.gms'
     }
 
+    implementation "pub.devrel:easypermissions:$rootProject.easyPermission"
 }
 repositories {
     mavenCentral()

@@ -11,11 +11,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.location.aravind.getlocation.GeoLocator;
 import com.rosen.jambo.R;
 import com.rosen.jambo.utils.NetworkConnectionDetector;
 import com.rosen.jambo.views.currentlocation.CurrentLocationFragment;
@@ -32,15 +29,10 @@ import nl.psdcompany.duonavigationdrawer.widgets.DuoDrawerToggle;
 
 public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMenuClickListener, MyTracker.ADLocationListener {
 
-    protected GoogleApiClient mGoogleApiClient;
-
     private MenuAdapter mMenuAdapter;
     private ViewHolder mViewHolder;
     Snackbar snackbar;
     private ArrayList<String> mTitles = new ArrayList<>();
-
-    String NEWS_API_KEY = System.getenv("NEWS_API_KEY");
-
 
     public static LocationHelper locationHelper;
     public static int PERMISSION_LOCATION_REQUEST_CODE = 1;
@@ -73,12 +65,6 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         handleDrawer();
 
         locationHelper = new LocationHelper(this);
-
-        // check availability of play services
-        if (locationHelper.checkPlayServices()) {
-            // Building the GoogleApi client
-            locationHelper.checkPermission();
-        }
 
         // Show main fragment in container
         mMenuAdapter.setViewSelected(0, true);
@@ -237,17 +223,9 @@ public class MainActivity extends AppCompatActivity implements DuoMenuView.OnMen
         }
     }
 
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        locationHelper.onActivityResult(requestCode,resultCode,data);
-    }
-
-
     @Override
     public void onResume() {
         super.onResume();
-        locationHelper.checkPlayServices();
         //  register broadcast receive once activity is in the foreground
         registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
     }

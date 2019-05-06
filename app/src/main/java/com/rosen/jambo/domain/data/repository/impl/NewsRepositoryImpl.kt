@@ -2,11 +2,13 @@ package com.rosen.jambo.domain.data.repository.impl
 
 import android.app.Application
 import android.os.AsyncTask
+import com.rosen.jambo.JamboApplication
 import com.rosen.jambo.domain.data.api.RetrofitModule
 import com.rosen.jambo.domain.data.db.ArticleDao
 import com.rosen.jambo.domain.data.db.ArticleDatabase
 import com.rosen.jambo.domain.data.db.BookmarkDao
 import com.rosen.jambo.domain.data.repository.abstractions.NewsInterfaceRepository
+import com.rosen.jambo.domain.dependencyinjection.RetrofitServiceModule
 import com.rosen.jambo.views.articles.Article
 import com.rosen.jambo.views.articles.Articles
 import com.rosen.jambo.views.bookmarks.Bookmark
@@ -15,6 +17,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import javax.inject.Inject
 
 /**
  * Created by Derick W on 13,March,2019
@@ -25,15 +28,16 @@ class NewsRepositoryImpl(application: Application?) : NewsInterfaceRepository {
 
     private var articleDao: ArticleDao
     private var bookmarkDao: BookmarkDao
-    private var articlesBy: List<Article>? = null
+    @Inject lateinit var retrofitServiceModule : RetrofitServiceModule
 
     init {
+        (application as JamboApplication).getApplicationComponent().inject(this)
         val db = ArticleDatabase.getDatabase(application)
         articleDao = db.articleDao()
         bookmarkDao = db.bookmarkDao()
     }
 
-    private var apiService = RetrofitModule().getNewsArticlesService()
+    var apiService = retrofitServiceModule.provideAPIService()
 
     override fun getNewsArticlesForLocation(location: String, apiKey: String): Observable<Articles> = apiService.getNewsArticles(location, apiKey)
 
@@ -93,7 +97,6 @@ class NewsRepositoryImpl(application: Application?) : NewsInterfaceRepository {
     }
 
     private class InsertArticleAsyncTask : AsyncTask<Article, Void, Void> {
-
         override fun doInBackground(vararg params: Article?): Void? {
             mAsyncTaskDao.insert(params[0])
             return null
@@ -104,11 +107,9 @@ class NewsRepositoryImpl(application: Application?) : NewsInterfaceRepository {
         constructor(dao: ArticleDao) {
             mAsyncTaskDao = dao
         }
-
     }
 
     private class InsertBookmarkAsyncTask : AsyncTask<Bookmark, Void, Void> {
-
         override fun doInBackground(vararg params: Bookmark?): Void? {
             mAsyncTaskDao.insertBookmark(params[0])
             return null
@@ -119,7 +120,6 @@ class NewsRepositoryImpl(application: Application?) : NewsInterfaceRepository {
         constructor(dao: BookmarkDao) {
             mAsyncTaskDao = dao
         }
-
     }
 
 }

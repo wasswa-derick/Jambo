@@ -57,7 +57,7 @@ public class ArticleContentPreferenceAdapter {
 
 
     //method to set the random background
-    public static void setRandomBackground(CardView cardView){
+    public static void setRandomBackground(CardView cardView)   {
 
         Random random = new Random();
         int position = random.nextInt(400 - 1) + 1;

@@ -9,13 +9,9 @@ import android.arch.lifecycle.ViewModelProvider
  * Github: @wasswa-derick
  * Andela (Kampala, Uganda)
  */
-class ArticleViewModelFactory : ViewModelProvider.Factory {
+class ArticleViewModelFactory(application: Application) : ViewModelProvider.Factory {
 
-    private var mApplication: Application? = null
-
-    constructor(application: Application) {
-        mApplication = application
-    }
+    private var mApplication: Application? = application
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return ArticlesViewModel(mApplication) as T

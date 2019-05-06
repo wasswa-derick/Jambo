@@ -9,6 +9,7 @@
     <string name="proceed">PROCEED</string>
     <string name="connect">Connect Internet</string>
     <string name="copyContent">Copy</string>
+    <string name="permissions">Need GPS permission for getting your location</string>
 
     <string-array name="locations">
         <item>Kampala</item>

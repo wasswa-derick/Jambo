@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
@@ -36,6 +35,7 @@ import android.widget.Toast;
 import com.rosen.jambo.R;
 import com.rosen.jambo.databinding.FragmentMainBinding;
 import com.rosen.jambo.utils.NetworkConnectionDetector;
+import com.rosen.jambo.utils.Roboto;
 import com.rosen.jambo.views.bookmarks.Bookmark;
 import com.rosen.jambo.views.bookmarks.BookmarksActivity;
 
@@ -69,6 +69,7 @@ public class MainFragment extends Fragment{
     FragmentMainBinding binding;
     private ActionMode actionMode = null;
     ActionModeCallback actionModeCallback = new ActionModeCallback();
+    Roboto roboto;
 
     public MainFragment(){}
 
@@ -83,6 +84,8 @@ public class MainFragment extends Fragment{
 
         //listener on changed sort text preference:
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        roboto = new Roboto(requireActivity());
 
         prefs.registerOnSharedPreferenceChangeListener(prefListener);
     }
@@ -233,33 +236,26 @@ public class MainFragment extends Fragment{
 
     // show the dialog text style
     public void showTextStyle() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppCompatAlertDialogStyle);
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity(), R.style.AppCompatAlertDialogStyle);
+        LayoutInflater inflater = LayoutInflater.from(requireActivity());
         View dl = inflater.inflate(R.layout.text_style, null);
 
-        Typeface typeface = Typeface.createFromAsset(getActivity().getAssets(), "fonts/RobotoRegular.ttf");
-        Typeface typeface1 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/LobsterTwoRegular.otf");
-        Typeface typeface2 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/journal.ttf");
-        Typeface typeface3 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/Walkway.ttf");
-        Typeface typeface5 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/GoodDog.otf");
-        Typeface typeface4 = Typeface.createFromAsset(getActivity().getAssets(), "fonts/DancingScriptRegular.otf");
-
-        RadioButton roboto = dl.findViewById(R.id.roboto);
-        roboto.setTypeface(typeface);
+        RadioButton robotoButton = dl.findViewById(R.id.roboto);
+        robotoButton.setTypeface(roboto.getLightRoboto());
         RadioButton journal = dl.findViewById(R.id.journal);
-        journal.setTypeface(typeface2);
+        journal.setTypeface(roboto.getJournal());
         RadioButton dancing = dl.findViewById(R.id.dancing);
-        dancing.setTypeface(typeface4);
+        dancing.setTypeface(roboto.getDancing());
         RadioButton walkway = dl.findViewById(R.id.walkway);
-        walkway.setTypeface(typeface3);
+        walkway.setTypeface(roboto.getWalkWay());
         RadioButton gooddog = dl.findViewById(R.id.gooddog);
-        gooddog.setTypeface(typeface5);
+        gooddog.setTypeface(roboto.getGoodDog());
         RadioButton lobster = dl.findViewById(R.id.lobster);
-        lobster.setTypeface(typeface1);
+        lobster.setTypeface(roboto.getLobster());
 
         String style = prefs.getString("text_style", "1");
         if (style.equalsIgnoreCase("1")) {
-            roboto.setChecked(true);
+            robotoButton.setChecked(true);
         }else if (style.equalsIgnoreCase("2")) {
             journal.setChecked(true);
         }else if (style.equalsIgnoreCase("3")) {
@@ -307,6 +303,8 @@ public class MainFragment extends Fragment{
                         editor5.putString("text_style", "5");
                         editor5.apply();
                         break;
+                    default:
+                        break;
                 }
 
                 articlesAdapter.notifyDataSetChanged();
@@ -316,15 +314,13 @@ public class MainFragment extends Fragment{
         builder.setTitle("Choose text style.");
         builder.setView(dl);
 
-
         final AlertDialog customAlertDialog = builder.create();
         customAlertDialog.show();
-
     }
 
     public void showTextSize() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppCompatAlertDialogStyle);
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity(), R.style.AppCompatAlertDialogStyle);
+        LayoutInflater inflater = LayoutInflater.from(requireActivity());
         View dl = inflater.inflate(R.layout.text_sizes, null);
 
         RadioButton normal = dl.findViewById(R.id.normal);
@@ -332,7 +328,6 @@ public class MainFragment extends Fragment{
         RadioButton medium = dl.findViewById(R.id.medium);
         RadioButton large = dl.findViewById(R.id.large);
         RadioButton xlarge = dl.findViewById(R.id.xlarge);
-
 
         String style = prefs.getString("text_style", "1");
         if (style.equalsIgnoreCase("1")) {
@@ -377,22 +372,19 @@ public class MainFragment extends Fragment{
                         editor4.putString("text_size", "5");
                         editor4.apply();
                         break;
+                    default:
+                        break;
                 }
 
                 articlesAdapter.notifyDataSetChanged();
             }
         });
 
-        builder.setTitle("Choose text syle.");
+        builder.setTitle("Choose text style.");
         builder.setView(dl);
-
-
-
 
         final AlertDialog customAlertDialog = builder.create();
         customAlertDialog.show();
-
-
     }
 
     private void updateActionModeTitle() {

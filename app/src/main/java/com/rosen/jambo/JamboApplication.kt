@@ -31,7 +31,7 @@ class JamboApplication: Application() {
     fun createApplicationComponent(): AppComponent {
         return DaggerAppComponent.builder()
                 .retrofitServiceModule(RetrofitServiceModule())
-                .build();
+                .build()
     }
 
 }
