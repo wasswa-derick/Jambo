@@ -1,5 +1,6 @@
 package com.rosen.jambo.domain.dependencyinjection
 
+import com.rosen.jambo.domain.data.repository.impl.NewsRepositoryImpl
 import com.rosen.jambo.views.articles.MainActivity
 import dagger.Component
 
@@ -12,6 +13,6 @@ import dagger.Component
 @Component(modules = [RetrofitServiceModule::class])
 interface AppComponent {
 
-    fun inject(mainactivity: MainActivity)
+    fun inject(newsRepositoryImpl: NewsRepositoryImpl)
 
 }

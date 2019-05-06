@@ -38,63 +38,14 @@ import java.util.Locale;
  */
 
 
-public class LocationHelper implements PermissionUtils.PermissionResultCallback {
+public class LocationHelper {
 
     private Context context;
-    private Activity current_activity;
-
-    private boolean isPermissionGranted;
-
-    // list of permissions
-
-    private ArrayList<String> permissions = new ArrayList<>();
-    private PermissionUtils permissionUtils;
-
-    private final static int PLAY_SERVICES_REQUEST = 1000;
-    private final static int REQUEST_CHECK_SETTINGS = 2000;
 
     public LocationHelper(Context context) {
-
         this.context = context;
-        this.current_activity = (Activity) context;
-
-        permissionUtils = new PermissionUtils(context, this);
-
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-
     }
 
-    /**
-     * Method to check the availability of location permissions
-     * */
-
-    public void checkPermission() {
-        permissionUtils.checkPermission(permissions, "Need GPS permission for getting your location", 1);
-    }
-
-
-    /**
-     * Method to verify google play services on the device
-     * */
-
-    public boolean checkPlayServices() {
-
-        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-
-        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
-
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (googleApiAvailability.isUserResolvableError(resultCode)) {
-                googleApiAvailability.getErrorDialog(current_activity, resultCode,
-                        PLAY_SERVICES_REQUEST).show();
-            } else {
-                showToast("This device is not supported.");
-            }
-            return false;
-        }
-        return true;
-    }
 
 
     public Address getAddress(double latitude, double longitude)
@@ -113,40 +64,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
         return null;
 
-    }
-
-
-
-    /**
-     * Handles the activity results
-     */
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CHECK_SETTINGS:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        // All required changes were successfully made
-                        break;
-                    case Activity.RESULT_CANCELED:
-                        // The user was asked to change settings, but chose not to
-                        break;
-                    default:
-                        break;
-                }
-                break;
-        }
-    }
-
-
-    @Override
-    public void PermissionGranted(int request_code) {
-        isPermissionGranted=true;
-    }
-
-
-    private void showToast(String message)
-    {
-        Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
     }
 
 

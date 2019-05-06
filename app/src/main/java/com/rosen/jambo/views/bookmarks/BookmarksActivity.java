@@ -4,7 +4,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.IdRes;
@@ -24,7 +23,7 @@ import android.widget.RadioGroup;
 
 import com.rosen.jambo.R;
 import com.rosen.jambo.databinding.BookmarksBinding;
-import com.rosen.jambo.databinding.FragmentMainBinding;
+import com.rosen.jambo.utils.Roboto;
 import com.rosen.jambo.views.articles.Article;
 import com.rosen.jambo.views.articles.ArticleDetails;
 import com.rosen.jambo.views.articles.ArticleListClick;
@@ -58,6 +57,7 @@ public class BookmarksActivity extends AppCompatActivity {
     SharedPreferences prefs;
 
     BookmarksBinding binding;
+    Roboto roboto;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +65,7 @@ public class BookmarksActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.bookmarks);
         View view = binding.getRoot();
 
+        roboto = new Roboto(getApplicationContext());
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setTitle(getApplicationContext().getString(R.string.bookmarks));
@@ -90,7 +91,6 @@ public class BookmarksActivity extends AppCompatActivity {
 
         getArticleDetails();
         getBookmarkArticles();
-
     }
 
     public void fetchBookmarks() {
@@ -131,7 +131,6 @@ public class BookmarksActivity extends AppCompatActivity {
                     bundle.putString("image", article.getUrlToImage());
                     intent.putExtra("data", bundle);
                     startActivity(intent);
-
             }
 
             @Override
@@ -170,29 +169,22 @@ public class BookmarksActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(BookmarksActivity.this);
         View dl = inflater.inflate(R.layout.text_style, null);
 
-        Typeface typeface = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/RobotoRegular.ttf");
-        Typeface typeface1 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/LobsterTwoRegular.otf");
-        Typeface typeface2 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/journal.ttf");
-        Typeface typeface3 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/Walkway.ttf");
-        Typeface typeface5 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/GoodDog.otf");
-        Typeface typeface4 = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/DancingScriptRegular.otf");
-
-        RadioButton roboto = dl.findViewById(R.id.roboto);
-        roboto.setTypeface(typeface);
+        RadioButton robotoButton = dl.findViewById(R.id.roboto);
+        robotoButton.setTypeface(roboto.getLightRoboto());
         RadioButton journal = dl.findViewById(R.id.journal);
-        journal.setTypeface(typeface2);
+        journal.setTypeface(roboto.getJournal());
         RadioButton dancing = dl.findViewById(R.id.dancing);
-        dancing.setTypeface(typeface4);
+        dancing.setTypeface(roboto.getDancing());
         RadioButton walkway = dl.findViewById(R.id.walkway);
-        walkway.setTypeface(typeface3);
+        walkway.setTypeface(roboto.getWalkWay());
         RadioButton gooddog = dl.findViewById(R.id.gooddog);
-        gooddog.setTypeface(typeface5);
+        gooddog.setTypeface(roboto.getGoodDog());
         RadioButton lobster = dl.findViewById(R.id.lobster);
-        lobster.setTypeface(typeface1);
+        lobster.setTypeface(roboto.getLobster());
 
         String style = prefs.getString("text_style", "1");
         if (style.equalsIgnoreCase("1")) {
-            roboto.setChecked(true);
+            robotoButton.setChecked(true);
         }else if (style.equalsIgnoreCase("2")) {
             journal.setChecked(true);
         }else if (style.equalsIgnoreCase("3")) {
@@ -252,7 +244,6 @@ public class BookmarksActivity extends AppCompatActivity {
 
         final AlertDialog customAlertDialog = builder.create();
         customAlertDialog.show();
-
     }
 
     public void showTextSize() {
@@ -321,7 +312,5 @@ public class BookmarksActivity extends AppCompatActivity {
 
         final AlertDialog customAlertDialog = builder.create();
         customAlertDialog.show();
-
-
     }
 }

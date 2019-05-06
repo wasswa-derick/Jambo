@@ -1,6 +1,5 @@
 package com.rosen.jambo.domain.data.api
 
-import com.rosen.jambo.views.articles.Article
 import com.rosen.jambo.views.articles.Articles
 import io.reactivex.Observable
 import retrofit2.http.GET

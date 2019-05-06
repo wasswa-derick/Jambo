@@ -12,6 +12,7 @@ import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -48,7 +49,6 @@ import com.rosen.jambo.views.articles.ArticleListClick;
 import com.rosen.jambo.views.articles.ArticleViewModelFactory;
 import com.rosen.jambo.views.articles.ArticlesAdapter;
 import com.rosen.jambo.views.articles.ArticlesViewModel;
-import com.rosen.jambo.views.articles.FragmentModel;
 import com.rosen.jambo.views.articles.MainActivity;
 
 import com.rosen.jambo.R;
@@ -59,7 +59,8 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 
 /**
@@ -68,7 +69,7 @@ import io.reactivex.schedulers.Schedulers;
  * Andela (Kampala, Uganda)
  */
 public class CurrentLocationFragment extends Fragment implements OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener, View.OnClickListener {
 
     Button btnProceed;
     TextView tvAddress;
@@ -78,6 +79,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
     CardView mapCard;
 
     RecyclerView articlesRecyclerView;
+    private final int REQUEST_LOCATION_PERMISSION = 1;
 
     StaggeredGridLayoutManager staggeredGridLayoutManager;
     LinearLayoutManager linearLayoutManager;
@@ -105,8 +107,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-
+        requestLocationPermission();
         articlesViewModel = ViewModelProviders.of(this, new ArticleViewModelFactory(requireActivity().getApplication())).get(ArticlesViewModel.class);
     }
 
@@ -114,7 +115,6 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.current_location, container, false);
         View view = binding.getRoot();
-
         binding.setViewModel(articlesViewModel);
 
         btnProceed = view.findViewById(R.id.btnLocation);
@@ -125,7 +125,6 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
         listRoot = view.findViewById(R.id.root);
         header = view.findViewById(R.id.header);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         final SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
@@ -134,10 +133,14 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
         linearLayoutManager = new LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false);
         initialiseArticleList(view);
 
-        rlPick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        rlPick.setOnClickListener(this);
+        return view;
+    }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.rlPickLocation:
                 if (MainActivity.lat != 0.0) {
                     String address = "";
                     latitude = MainActivity.lat;
@@ -156,12 +159,8 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
 
                     showToast("Couldn't get the location. Make sure location is enabled on the device");
                 }
-            }
-        });
-
-        btnProceed.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                break;
+            case R.id.btnLocation:
                 if (city != null) {
                     header.setVisibility(View.GONE);
                     btnProceed.setVisibility(View.GONE);
@@ -173,10 +172,28 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
                     checkNetworkConnection();
 
                 }
-            }
-        });
+                break;
+            default:
+                break;
+        }
+    }
 
-        return view;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
+    private void requestLocationPermission() {
+        String[] perms = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
+        if (EasyPermissions.hasPermissions(requireActivity(), perms)) {
+
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.permissions),
+                    REQUEST_LOCATION_PERMISSION, perms);
+        }
     }
 
     public void getOfflineArticles(String articleTag){
@@ -213,9 +230,6 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_quilt) {
             articlesRecyclerView.setLayoutManager(staggeredGridLayoutManager);
@@ -291,19 +305,16 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
                 });
     }
 
-    public void showToast(String message)
-    {
+    public void showToast(String message) {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
-    public void getAddress(Location location)
-    {
+    public void getAddress(Location location) {
         Address locationAddress;
 
         locationAddress = MainActivity.locationHelper.getAddress(location.getLatitude(), location.getLongitude());
 
-        if(locationAddress!=null)
-        {
+        if(locationAddress!=null) {
 
             String address = locationAddress.getAddressLine(0);
             String address1 = locationAddress.getAddressLine(1);
@@ -315,22 +326,18 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
 
             String currentLocation;
 
-            if(!TextUtils.isEmpty(address))
-            {
+            if(!TextUtils.isEmpty(address)) {
                 currentLocation=address;
 
                 if (!TextUtils.isEmpty(address1))
                     currentLocation+="\n"+address1;
 
-                if (!TextUtils.isEmpty(city))
-                {
+                if (!TextUtils.isEmpty(city)) {
                     currentLocation+="\n"+city;
 
                     if (!TextUtils.isEmpty(postalCode))
                         currentLocation+=" - "+postalCode;
-                }
-                else
-                {
+                } else {
                     if (!TextUtils.isEmpty(postalCode))
                         currentLocation+="\n"+postalCode;
                 }
@@ -349,8 +356,7 @@ public class CurrentLocationFragment extends Fragment implements OnMapReadyCallb
                     btnProceed.setEnabled(true);
             }
 
-        }
-        else
+        } else
             showToast("Something went wrong");
     }
 

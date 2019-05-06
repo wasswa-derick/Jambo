@@ -51,6 +51,7 @@ ext {
     okttpMockWebServer = '3.11.0'
     testRulesVersion = '0.5'
     roomVersion = '1.1.1'
+    easyPermission = '2.0.1'
 }
 
 task clean(type: Delete) {
