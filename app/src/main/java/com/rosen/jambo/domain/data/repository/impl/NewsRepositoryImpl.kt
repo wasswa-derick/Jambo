@@ -39,7 +39,7 @@ class NewsRepositoryImpl(application: Application?) : NewsInterfaceRepository {
 
     var apiService = retrofitServiceModule.provideAPIService()
 
-    override fun getNewsArticlesForLocation(location: String, apiKey: String): Observable<Articles> = apiService.getNewsArticles(location, apiKey)
+    override fun getNewsArticlesForLocation(location: String, apiKey: String): Observable<Articles> = apiService.getNewsArticles(location, "popularity", apiKey)
 
     override fun getNewsArticlesForLocationOffline(location: String): List<Article> {
         return getArticlesBy(location)

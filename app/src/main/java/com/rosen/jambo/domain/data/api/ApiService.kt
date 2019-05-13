@@ -13,6 +13,6 @@ import retrofit2.http.Query
 interface ApiService {
 
     @GET("everything")
-    fun getNewsArticles(@Query("q")location: String, @Query("apiKey")apiKey: String): Observable<Articles>
+    fun getNewsArticles(@Query("q")location: String, @Query("sortBy") sortBy: String, @Query("apiKey")apiKey: String): Observable<Articles>
 
 }

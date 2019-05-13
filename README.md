@@ -8,8 +8,8 @@ Jambo
 A news application that shows articles based a user's current location as well as other categories for locations such as Kampala (Uganda), Kigali (Rwanda), Nairobi (Kenya), Lagos (Nigeria), and New York (USA).
 
 
-### [Jambo on Google Play Store](https:play.store.com)
-### [Jambo on Amazon App Store](https://www.amazon.com)
+### [Jambo on Google Play Store](https://play.google.com/store/apps/details?id=com.rosen.jambo)
+### [Jambo on Amazon App Store](https://www.amazon.com/Andela-Jambo-News/dp/B07RLQ8BMP/ref=sr_1_1?keywords=Jambo+News&qid=1557739030&s=gateway&sr=8-1-spell)
 
 
 ## Screenshots
