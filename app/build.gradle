@@ -1,4 +1,7 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'com.github.triplet.play' version '2.0.0'
+}
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply from: "$project.rootDir/config/jacoco.gradle"
@@ -10,10 +13,20 @@ android {
         applicationId "com.rosen.jambo"
         minSdkVersion rootProject.myMinSdkVersion
         targetSdkVersion rootProject.myTargetSdkVersion
-        versionCode 4
+        versionCode getBuildVersion() as int
         versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+    }
+
+    signingConfigs {
+
+        release {
+            storeFile file(System.getenv("KEYSTORE") ?: "keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEYSTORE_PASSWORD")
+        }
     }
 
     buildTypes {
@@ -34,6 +47,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             resValue 'string', "google_maps_api_key", project.hasProperty('GOOGLE_MAPS_API_KEY') ? GOOGLE_MAPS_API_KEY : System.getenv('GOOGLE_MAPS_API_KEY')
             resValue 'string', "news_api_key", project.hasProperty('NEWS_API_KEY') ? NEWS_API_KEY : System.getenv('NEWS_API_KEY')
+            signingConfig signingConfigs.release
         }
     }
 
@@ -58,6 +72,44 @@ android {
         generateStubs = true
     }
 
+}
+
+static def getBuildVersion() {
+    def version = 123
+    def buildNumber = System.getenv("CIRCLE_BUILD_NUM")
+    if (buildNumber != null) {
+        version += buildNumber
+    }
+    println("VersionCode: " + version)
+    return version
+}
+
+play {
+    track = getDeploymentTrack()
+    serviceAccountCredentials = file(System.getenv("PRIVATE_KEY") ?: "private_key.json")
+    defaultToAppBundles = true
+    resolutionStrategy = "ignore"
+}
+
+// The deployment track is based on the branch.
+static def getDeploymentTrack() {
+    def branch = gitBranch()
+    def track = 'internal'
+    if (branch == "develop") {
+        track = "beta"
+    }
+    println("DEPLOYMENT TRACK: " + track)
+    return track
+}
+
+static def gitBranch() {
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    println("BRANCH: " + branch)
+    branch
 }
 
 dependencies {
