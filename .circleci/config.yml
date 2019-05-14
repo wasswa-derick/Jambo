@@ -80,6 +80,19 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run: sdkmanager --install
       - run: sdkmanager --licenses
+
+      - run:
+          name: Decode and store Keystore
+          command: |
+            echo $ENCODED_KEYSTORE | base64 --decode >> ${HOME}/keystore.jks
+            echo ‘export KEYSTORE=${HOME}/keystore.jks’ >> $BASH_ENV
+
+      - run:
+          name: Decode and store Private Key
+          command: |
+            echo $DEPLOYMENT_PRIVATE_KEY | base64 --decode >> ${HOME}/deployment_private_key.json
+            echo ‘export PRIVATE_KEY=${HOME}/deployment_private_key.json’ >> $BASH_ENV
+
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
@@ -225,6 +238,34 @@ jobs:
           path: app/build/reports/
           destination: /reports/
 
+  deploy_staging:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          - v1-dependencies-
+      - run: ./gradlew androidDependencies
+
+      - run:
+          name: Upload to Google Play
+          command: ./gradlew publishStagingRelease
+
+  deploy_live:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          - v1-dependencies-
+      - run: ./gradlew androidDependencies
+
+       - run:
+           name: Upload to Google Play
+           command: ./gradlew publishRelease
+
 ## Workflows
 workflows:
   version: 2
@@ -241,3 +282,22 @@ workflows:
           requires:
             - test_unit
             - test_instrumented
+#      - deploy_live:
+#          requires:
+#            - build_debug
+#            - test_unit
+#            - test_instrumented
+#          filters:
+#            branches:
+#              only:
+#              - master
+      - deploy_staging:
+          requires:
+            - build_debug
+            - test_unit
+            - test_instrumented
+          filters:
+            branches:
+              only:
+              - develop
+              - release
